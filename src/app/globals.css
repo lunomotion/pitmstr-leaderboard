@@ -1,26 +1,270 @@
 @import "tailwindcss";
 
+/* PITMSTR Brand Colors */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary Colors */
+  --bbq-red: #C62828;
+  --bbq-red-dark: #8E0000;
+  --bbq-red-light: #FF5F52;
+
+  /* Neutral Colors */
+  --smoke-black: #1C1C1C;
+  --smoke-black-light: #2D2D2D;
+  --brisket-brown: #6D4C41;
+  --brisket-brown-light: #8B6B5B;
+
+  /* Accent Colors */
+  --americana-blue: #2E3A87;
+  --americana-blue-light: #4A5BA8;
+
+  /* Utility Colors */
+  --clean-white: #FFFFFF;
+  --neutral-grey: #CCCCCC;
+  --light-grey: #F5F5F5;
+  --medium-grey: #9E9E9E;
+
+  /* Semantic Colors */
+  --success-green: #2E7D32;
+  --warning-orange: #F57C00;
+  --gold: #FFD700;
+  --silver: #C0C0C0;
+  --bronze: #CD7F32;
+
+  /* Background and Foreground */
+  --background: var(--clean-white);
+  --foreground: var(--smoke-black);
+  --card-bg: var(--clean-white);
+  --card-border: #E5E5E5;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Brand Colors as Tailwind utilities */
+  --color-bbq-red: var(--bbq-red);
+  --color-bbq-red-dark: var(--bbq-red-dark);
+  --color-bbq-red-light: var(--bbq-red-light);
+  --color-smoke-black: var(--smoke-black);
+  --color-smoke-black-light: var(--smoke-black-light);
+  --color-brisket-brown: var(--brisket-brown);
+  --color-americana-blue: var(--americana-blue);
+  --color-americana-blue-light: var(--americana-blue-light);
+  --color-neutral-grey: var(--neutral-grey);
+  --color-light-grey: var(--light-grey);
+  --color-success-green: var(--success-green);
+  --color-warning-orange: var(--warning-orange);
+  --color-gold: var(--gold);
+  --color-silver: var(--silver);
+  --color-bronze: var(--bronze);
+
+  --font-sans: "Open Sans", sans-serif;
+  --font-heading: "Oswald", sans-serif;
+  --font-accent: "Permanent Marker", cursive;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography Utilities */
+.font-heading {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.font-accent {
+  font-family: var(--font-accent);
+}
+
+/* Rank Badge Styles */
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+
+.rank-badge.gold {
+  background: linear-gradient(135deg, var(--gold), #FFA000);
+  color: var(--smoke-black);
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.rank-badge.silver {
+  background: linear-gradient(135deg, var(--silver), #9E9E9E);
+  color: var(--smoke-black);
+  box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+.rank-badge.bronze {
+  background: linear-gradient(135deg, var(--bronze), #A0522D);
+  color: var(--clean-white);
+  box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+.rank-badge.standard {
+  background: var(--light-grey);
+  color: var(--smoke-black);
+}
+
+/* Card Styles */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-hover {
+  transition: all 0.2s ease;
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Button Styles */
+.btn-primary {
+  background: var(--bbq-red);
+  color: var(--clean-white);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: var(--bbq-red-dark);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--smoke-black);
+  font-weight: 600;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  border: 2px solid var(--smoke-black);
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: var(--smoke-black);
+  color: var(--clean-white);
+}
+
+/* Category Filter Pills */
+.filter-pill {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid var(--card-border);
+  background: var(--clean-white);
+  color: var(--smoke-black);
+}
+
+.filter-pill.active {
+  background: var(--smoke-black);
+  color: var(--clean-white);
+  border-color: var(--smoke-black);
+}
+
+.filter-pill:hover:not(.active) {
+  border-color: var(--smoke-black);
+}
+
+/* Score Display */
+.score-display {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--smoke-black);
+}
+
+/* Division Badge */
+.division-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.division-badge.hsbbq {
+  background: var(--americana-blue);
+  color: var(--clean-white);
+}
+
+.division-badge.msbbq {
+  background: var(--brisket-brown);
+  color: var(--clean-white);
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  .mobile-stack {
+    flex-direction: column;
+  }
+
+  .mobile-full {
+    width: 100%;
+  }
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Fire/flame accent for PITMSTR branding */
+.fire-gradient {
+  background: linear-gradient(135deg, #FF6B35, #F7931E, #C62828);
+}
+
+.text-fire {
+  background: linear-gradient(135deg, #FF6B35, #F7931E, #C62828);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
