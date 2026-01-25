@@ -161,7 +161,7 @@ export default function AdminLayout({
               {/* PITMSTR Logo - Large and prominent */}
               <div className="relative h-12 w-full mb-4">
                 <Image
-                  src="/images/pitmstr-logo.png"
+                  src="/images/pitmstr-flame.png"
                   alt="PITMSTR"
                   fill
                   className="object-contain object-left"

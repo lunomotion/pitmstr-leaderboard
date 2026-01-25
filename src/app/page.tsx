@@ -189,7 +189,7 @@ export default function Home() {
             </div>
             <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg">
               <Image
-                src="/images/pitmstr-logo.png"
+                src="/images/pitmstr-flame.png"
                 alt="PITMSTR Logo"
                 width={120}
                 height={150}
@@ -407,7 +407,7 @@ export default function Home() {
               </div>
               <div className="bg-white p-3 rounded-xl">
                 <Image
-                  src="/images/pitmstr-logo.png"
+                  src="/images/pitmstr-flame.png"
                   alt="PITMSTR"
                   width={60}
                   height={75}
