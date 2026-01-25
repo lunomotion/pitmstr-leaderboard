@@ -45,13 +45,13 @@ export default function Header() {
             />
           </Link>
 
-          {/* Login button - right side (desktop) */}
+          {/* Admin button - right side (desktop) */}
           <Link
-            href="/login"
+            href="/admin"
             className="hidden md:flex absolute right-6 items-center gap-2 px-4 py-2 bg-bbq-red text-white rounded-lg text-sm font-semibold hover:bg-bbq-red/90 transition-colors"
           >
             <User className="w-4 h-4" />
-            Login
+            Admin
           </Link>
         </div>
 
@@ -82,10 +82,10 @@ export default function Header() {
             Teams
           </Link>
           <Link
-            href="/schools"
+            href="/knowledge-base"
             className="text-sm font-semibold text-white hover:text-bbq-red transition-colors uppercase tracking-wide"
           >
-            Schools
+            Knowledge Base
           </Link>
         </nav>
 
@@ -122,19 +122,19 @@ export default function Header() {
                 Teams
               </Link>
               <Link
-                href="/schools"
+                href="/knowledge-base"
                 className="px-4 py-3 text-sm font-semibold text-white hover:bg-white/10 rounded-lg transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Schools
+                Knowledge Base
               </Link>
               <Link
-                href="/login"
+                href="/admin"
                 className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-3 bg-bbq-red text-white rounded-lg text-sm font-semibold hover:bg-bbq-red/90 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <User className="w-4 h-4" />
-                Login
+                Admin
               </Link>
             </nav>
           </div>
