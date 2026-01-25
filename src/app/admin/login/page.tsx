@@ -3,7 +3,8 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Lock, AlertCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Lock, AlertCircle, Loader2, ArrowLeft } from "lucide-react";
 
 function LoginForm() {
   const router = useRouter();
@@ -42,101 +43,148 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-americana-blue flex flex-col items-center justify-center p-4">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          }}
-        />
-      </div>
-
-      <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Image
-            src="/images/nhsbbqa-logo.png"
-            alt="NHSBBQA Logo"
-            width={150}
-            height={100}
-            className="h-20 w-auto"
-            priority
-          />
-        </div>
-
-        {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-americana-blue/10 mb-4">
-              <Lock className="w-8 h-8 text-americana-blue" />
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* Left side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-americana-blue via-americana-blue to-[#1e2a5e] relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/assets/backgrounds/bg-smoke.svg')] opacity-10" />
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <div>
+            <div className="flex items-center gap-4">
+              <div className="relative w-14 h-14 bg-white rounded-2xl p-2 shadow-xl">
+                <Image
+                  src="/images/nhsbbqa-logo.png"
+                  alt="NHSBBQA"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div>
+                <h1 className="font-heading text-2xl text-white">PITMSTR</h1>
+                <p className="text-white/60 text-sm">Admin Portal</p>
+              </div>
             </div>
-            <h1 className="font-heading text-2xl text-smoke-black">
-              Admin Access
-            </h1>
-            <p className="text-medium-grey mt-1">
-              Enter your password to continue
+          </div>
+
+          <div className="space-y-6">
+            <blockquote className="text-2xl font-medium text-white leading-relaxed">
+              &ldquo;Where Dreams Ignite&rdquo;
+            </blockquote>
+            <p className="text-white/70">
+              Manage competitions, teams, and schools for the National High
+              School BBQ Association.
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="flex items-center gap-2 p-3 bg-bbq-red/10 border border-bbq-red/20 rounded-lg text-bbq-red text-sm">
-                <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                {error}
-              </div>
-            )}
+          <div className="flex items-center gap-3 text-white/50 text-sm">
+            <span>NHSBBQA</span>
+            <span className="w-1 h-1 rounded-full bg-white/30" />
+            <span>National High School BBQ Association</span>
+          </div>
+        </div>
 
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                className="w-full px-4 py-3 border border-neutral-grey rounded-lg focus:outline-none focus:ring-2 focus:ring-americana-blue focus:border-transparent transition-all"
-                required
-                autoFocus
+        {/* Decorative circles */}
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-white/5 rounded-full" />
+        <div className="absolute top-1/4 -right-16 w-48 h-48 bg-white/5 rounded-full" />
+      </div>
+
+      {/* Right side - Login Form */}
+      <div className="flex-1 flex flex-col">
+        {/* Mobile header */}
+        <div className="lg:hidden p-6 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative w-10 h-10 bg-americana-blue rounded-xl p-1.5">
+              <Image
+                src="/images/nhsbbqa-logo.png"
+                alt="NHSBBQA"
+                fill
+                className="object-contain"
+                priority
               />
             </div>
+            <span className="font-heading text-lg text-slate-900">PITMSTR</span>
+          </div>
+        </div>
 
-            <button
-              type="submit"
-              disabled={isLoading || !password}
-              className="w-full btn-primary py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Authenticating...
-                </>
-              ) : (
-                <>
-                  <Lock className="w-5 h-5" />
-                  Sign In
-                </>
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 pt-6 border-t border-neutral-grey/30 text-center">
-            <a
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm">
+            <Link
               href="/"
-              className="text-sm text-americana-blue hover:underline"
+              className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 mb-8 transition-colors"
             >
-              Return to Home
-            </a>
+              <ArrowLeft className="w-4 h-4" />
+              Back to site
+            </Link>
+
+            <div className="space-y-2 mb-8">
+              <h2 className="text-2xl font-bold text-slate-900">Welcome back</h2>
+              <p className="text-slate-500">
+                Enter your password to access the admin dashboard.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue focus:border-transparent transition-all text-slate-900 placeholder:text-slate-400"
+                    required
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || !password}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-americana-blue text-white rounded-xl font-medium hover:bg-americana-blue/90 focus:outline-none focus:ring-2 focus:ring-americana-blue focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-americana-blue/25"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  "Sign in"
+                )}
+              </button>
+            </form>
+
+            <p className="mt-8 text-center text-sm text-slate-500">
+              Need access?{" "}
+              <a
+                href="mailto:admin@nhsbbqa.org"
+                className="text-americana-blue hover:underline"
+              >
+                Contact your administrator
+              </a>
+            </p>
           </div>
         </div>
 
         {/* Footer */}
-        <p className="text-center text-white/60 text-sm mt-6">
-          NHSBBQA Admin Portal
-        </p>
+        <div className="p-6 text-center text-sm text-slate-400">
+          <p>NHSBBQA Admin Portal</p>
+        </div>
       </div>
     </div>
   );
@@ -144,8 +192,8 @@ function LoginForm() {
 
 function LoginFallback() {
   return (
-    <div className="min-h-screen bg-americana-blue flex items-center justify-center">
-      <Loader2 className="w-8 h-8 animate-spin text-white" />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <Loader2 className="w-8 h-8 animate-spin text-americana-blue" />
     </div>
   );
 }
