@@ -404,16 +404,17 @@ export async function getSchool(schoolId: string): Promise<School | null> {
   }
 }
 
-// Search teams
+// Search teams (pass empty string or space to get all)
 export async function searchTeams(query: string): Promise<Team[]> {
   try {
     await Promise.all([loadDivisionsCache(), loadStatesCache()]);
 
-    const lowerQuery = query.toLowerCase();
+    const lowerQuery = query.trim().toLowerCase();
+    const returnAll = lowerQuery === "" || lowerQuery === " ";
 
     const records = await getBase()(TABLES.TEAMS)
       .select({
-        maxRecords: 50,
+        maxRecords: returnAll ? 200 : 50,
       })
       .all();
 
@@ -423,8 +424,9 @@ export async function searchTeams(query: string): Promise<Team[]> {
       const teamName = (record.get("Team Name") as string) || "";
       const state = (record.get("State") as string) || "";
 
-      // Simple text search
+      // Simple text search (or return all if no query)
       if (
+        returnAll ||
         teamName.toLowerCase().includes(lowerQuery) ||
         state.toLowerCase().includes(lowerQuery)
       ) {
@@ -457,7 +459,7 @@ export async function searchTeams(query: string): Promise<Team[]> {
           state: state,
         });
 
-        if (teams.length >= 20) break;
+        if (!returnAll && teams.length >= 20) break;
       }
     }
 

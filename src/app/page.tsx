@@ -9,14 +9,6 @@ import DivisionFilter from "@/components/DivisionFilter";
 import { Flame, Calendar, Trophy, Users, Loader2, MapPin, School } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
 
-// Sample stats data
-const SAMPLE_STATS = {
-  events: 47,
-  teams: 312,
-  schools: 156,
-  states: 23,
-};
-
 // Sample events for display when no Airtable data
 const SAMPLE_EVENTS: Event[] = [
   {
@@ -91,39 +83,55 @@ const SAMPLE_EVENTS: Event[] = [
   },
 ];
 
+interface Stats {
+  events: number;
+  teams: number;
+  schools: number;
+  states: number;
+}
+
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
+  const [stats, setStats] = useState<Stats>({ events: 0, teams: 0, schools: 0, states: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
   const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
 
-  // Fetch events from API
+  // Fetch events and stats from API
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchData() {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await fetch("/api/events");
-        const data = await response.json();
 
-        if (data.success && data.data && data.data.length > 0) {
-          setEvents(data.data);
+        // Fetch events
+        const eventsResponse = await fetch("/api/events");
+        const eventsData = await eventsResponse.json();
+
+        if (eventsData.success && eventsData.data && eventsData.data.length > 0) {
+          setEvents(eventsData.data);
         } else {
-          // Use sample events as fallback
           setEvents(SAMPLE_EVENTS);
         }
+
+        // Fetch stats
+        const statsResponse = await fetch("/api/stats");
+        const statsData = await statsResponse.json();
+
+        if (statsData.success && statsData.data) {
+          setStats(statsData.data);
+        }
       } catch (err) {
-        console.error("Error fetching events:", err);
-        // Use sample events as fallback on error
+        console.error("Error fetching data:", err);
         setEvents(SAMPLE_EVENTS);
       } finally {
         setIsLoading(false);
       }
     }
 
-    fetchEvents();
+    fetchData();
   }, []);
 
   // Filter events
@@ -162,16 +170,43 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="bg-americana-blue text-white py-10 md:py-16 px-4">
-        <div className="max-w-7xl mx-auto text-center">
+      <section className="relative bg-gradient-to-br from-americana-blue via-americana-blue-light to-white/90 text-white py-10 md:py-16 px-4 overflow-hidden">
+        {/* Subtle gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-americana-blue/20 to-white/30" />
+
+        <div className="relative max-w-7xl mx-auto text-center">
+          {/* Logos Section */}
+          <div className="flex items-center justify-center gap-6 md:gap-10 mb-8">
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg">
+              <Image
+                src="/images/nhsbbqa-logo.png"
+                alt="NHSBBQA Logo"
+                width={200}
+                height={140}
+                className="h-24 md:h-32 w-auto"
+                priority
+              />
+            </div>
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg">
+              <Image
+                src="/images/pitmstr-logo.png"
+                alt="PITMSTR Logo"
+                width={120}
+                height={150}
+                className="h-24 md:h-32 w-auto"
+                priority
+              />
+            </div>
+          </div>
+
           {/* Tagline */}
           <p
-            className="text-2xl md:text-4xl text-bbq-red font-bold mb-3"
+            className="text-2xl md:text-4xl text-bbq-red font-bold mb-3 drop-shadow-lg"
             style={{ fontFamily: "var(--font-permanent-marker)" }}
           >
             WHERE DREAMS IGNITE!
           </p>
-          <p className="text-neutral-grey max-w-2xl mx-auto mb-8 text-sm md:text-base">
+          <p className="text-white max-w-2xl mx-auto mb-8 text-sm md:text-base drop-shadow-md">
             Real-time BBQ competition leaderboard for the National High School
             BBQ Association. Track teams, scores, and rankings across events
             nationwide.
@@ -179,59 +214,59 @@ export default function Home() {
 
           {/* Quick stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto">
-            <div className="bg-white/5 rounded-xl p-4 md:p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-bbq-red/20 rounded-full">
-                <Calendar className="w-6 h-6 text-bbq-red" />
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-bbq-red rounded-full">
+                <Calendar className="w-6 h-6 text-white" />
               </div>
               <p
-                className="text-3xl md:text-4xl font-bold"
+                className="text-3xl md:text-4xl font-bold text-smoke-black"
                 style={{ fontFamily: "var(--font-oswald)" }}
               >
-                {events.length > 0 ? events.length : SAMPLE_STATS.events}
+                {stats.events > 0 ? stats.events : events.length}
               </p>
-              <p className="text-xs md:text-sm text-neutral-grey mt-1">Events</p>
+              <p className="text-xs md:text-sm text-medium-grey mt-1">Events</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-4 md:p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-americana-blue/20 rounded-full">
-                <Users className="w-6 h-6 text-americana-blue-light" />
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-americana-blue rounded-full">
+                <Users className="w-6 h-6 text-white" />
               </div>
               <p
-                className="text-3xl md:text-4xl font-bold"
+                className="text-3xl md:text-4xl font-bold text-smoke-black"
                 style={{ fontFamily: "var(--font-oswald)" }}
               >
-                {SAMPLE_STATS.teams}
+                {stats.teams > 0 ? stats.teams : "-"}
               </p>
-              <p className="text-xs md:text-sm text-neutral-grey mt-1">Teams</p>
+              <p className="text-xs md:text-sm text-medium-grey mt-1">Teams</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-4 md:p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-brisket-brown/20 rounded-full">
-                <School className="w-6 h-6 text-brisket-brown" />
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-brisket-brown rounded-full">
+                <School className="w-6 h-6 text-white" />
               </div>
               <p
-                className="text-3xl md:text-4xl font-bold"
+                className="text-3xl md:text-4xl font-bold text-smoke-black"
                 style={{ fontFamily: "var(--font-oswald)" }}
               >
-                {SAMPLE_STATS.schools}
+                {stats.schools > 0 ? stats.schools : "-"}
               </p>
-              <p className="text-xs md:text-sm text-neutral-grey mt-1">Schools</p>
+              <p className="text-xs md:text-sm text-medium-grey mt-1">Schools</p>
             </div>
-            <div className="bg-white/5 rounded-xl p-4 md:p-6">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-gold/20 rounded-full">
-                <MapPin className="w-6 h-6 text-gold" />
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-gold rounded-full">
+                <MapPin className="w-6 h-6 text-white" />
               </div>
               <p
-                className="text-3xl md:text-4xl font-bold"
+                className="text-3xl md:text-4xl font-bold text-smoke-black"
                 style={{ fontFamily: "var(--font-oswald)" }}
               >
-                {SAMPLE_STATS.states}
+                {stats.states > 0 ? stats.states : "-"}
               </p>
-              <p className="text-xs md:text-sm text-neutral-grey mt-1">States</p>
+              <p className="text-xs md:text-sm text-medium-grey mt-1">States</p>
             </div>
           </div>
 
           {/* Secondary tagline */}
           <p
-            className="mt-8 text-lg md:text-xl text-neutral-grey/80 italic"
+            className="mt-8 text-lg md:text-xl text-white/90 italic drop-shadow-md"
             style={{ fontFamily: "var(--font-permanent-marker)" }}
           >
             &ldquo;COME EAT OUR HOMEWORK!&rdquo;
@@ -356,22 +391,37 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-americana-blue text-white py-8 px-4 mt-12">
+      <footer className="bg-smoke-black text-white py-10 px-4 mt-12">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/images/pitmstr-logo.png"
-                alt="PITMSTR"
-                width={120}
-                height={30}
-                className="h-8 w-auto opacity-80"
-              />
+          <div className="flex flex-col items-center gap-6">
+            {/* Footer Logos */}
+            <div className="flex items-center gap-6">
+              <div className="bg-white p-3 rounded-xl">
+                <Image
+                  src="/images/nhsbbqa-logo.png"
+                  alt="NHSBBQA"
+                  width={120}
+                  height={80}
+                  className="h-14 w-auto"
+                />
+              </div>
+              <div className="bg-white p-3 rounded-xl">
+                <Image
+                  src="/images/pitmstr-logo.png"
+                  alt="PITMSTR"
+                  width={60}
+                  height={75}
+                  className="h-14 w-auto"
+                />
+              </div>
             </div>
-            <p className="text-sm text-neutral-grey text-center">
+            <p
+              className="text-sm text-white/80 text-center font-semibold tracking-wider"
+              style={{ fontFamily: "var(--font-oswald)" }}
+            >
               EDUCATION. BARBECUE. FAMILY.
             </p>
-            <p className="text-xs text-neutral-grey">
+            <p className="text-xs text-white/50">
               &copy; {new Date().getFullYear()} NHSBBQA&reg;. All rights reserved.
             </p>
           </div>

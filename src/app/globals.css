@@ -48,15 +48,18 @@
   --color-smoke-black: var(--smoke-black);
   --color-smoke-black-light: var(--smoke-black-light);
   --color-brisket-brown: var(--brisket-brown);
+  --color-brisket-brown-light: var(--brisket-brown-light);
   --color-americana-blue: var(--americana-blue);
   --color-americana-blue-light: var(--americana-blue-light);
   --color-neutral-grey: var(--neutral-grey);
   --color-light-grey: var(--light-grey);
+  --color-medium-grey: var(--medium-grey);
   --color-success-green: var(--success-green);
   --color-warning-orange: var(--warning-orange);
   --color-gold: var(--gold);
   --color-silver: var(--silver);
   --color-bronze: var(--bronze);
+  --color-card-border: var(--card-border);
 
   --font-sans: "Open Sans", sans-serif;
   --font-heading: "Oswald", sans-serif;

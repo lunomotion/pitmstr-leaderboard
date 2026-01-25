@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, MapPin, Users, ChevronRight, Flame } from "lucide-react";
+import { Calendar, MapPin, Users, ChevronRight, Flame, Trash2 } from "lucide-react";
 import type { Event } from "@/lib/types";
 import DivisionBadge from "./DivisionBadge";
 
 interface EventCardProps {
   event: Event;
+  onDelete?: (eventId: string) => void;
 }
 
-export default function EventCard({ event }: EventCardProps) {
+export default function EventCard({ event, onDelete }: EventCardProps) {
   const statusColors = {
     live: "bg-bbq-red text-white animate-pulse",
     upcoming: "bg-americana-blue text-white",
@@ -82,9 +83,24 @@ export default function EventCard({ event }: EventCardProps) {
             </div>
           </div>
 
-          {/* Arrow */}
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-light-grey">
-            <ChevronRight className="w-5 h-5 text-smoke-black" />
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            {onDelete && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onDelete(event.id);
+                }}
+                className="p-2 text-neutral-grey hover:text-bbq-red hover:bg-bbq-red/10 rounded-lg transition-colors"
+                title="Delete event"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
+            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-light-grey">
+              <ChevronRight className="w-5 h-5 text-smoke-black" />
+            </div>
           </div>
         </div>
 

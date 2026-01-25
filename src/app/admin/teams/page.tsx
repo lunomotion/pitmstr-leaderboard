@@ -5,9 +5,9 @@ import Link from "next/link";
 import {
   Plus,
   Search,
-  Calendar,
-  MapPin,
   Users,
+  School,
+  MapPin,
   ExternalLink,
   Loader2,
   Filter,
@@ -15,135 +15,125 @@ import {
   X,
 } from "lucide-react";
 
-interface Event {
+interface Team {
   id: string;
   name: string;
-  date: string;
-  location: string;
-  state: string;
+  schoolName?: string;
+  schoolId?: string;
   division: string;
-  status: "upcoming" | "live" | "completed";
-  registeredTeams?: number;
+  state?: string;
+  coach?: string;
 }
 
-export default function AdminEventsPage() {
-  const [events, setEvents] = useState<Event[]>([]);
+export default function AdminTeamsPage() {
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [divisionFilter, setDivisionFilter] = useState<string>("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form state
-  const [newEvent, setNewEvent] = useState({
+  const [newTeam, setNewTeam] = useState({
     name: "",
-    date: "",
-    location: "",
+    state: "",
     division: "HSBBQ",
-    description: "",
+    coach: "",
   });
 
-  async function fetchEvents() {
+  async function fetchTeams() {
     try {
-      const res = await fetch("/api/events");
+      const res = await fetch("/api/teams");
       const json = await res.json();
       if (json.success && json.data) {
-        setEvents(json.data);
+        setTeams(json.data);
       }
     } catch (err) {
-      console.error("Failed to fetch events:", err);
+      console.error("Failed to fetch teams:", err);
     } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    fetchEvents();
+    fetchTeams();
   }, []);
 
-  async function handleAddEvent(e: React.FormEvent) {
+  async function handleAddTeam(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/events", {
+      const res = await fetch("/api/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newEvent),
+        body: JSON.stringify(newTeam),
       });
       const json = await res.json();
 
       if (json.success) {
         setShowAddModal(false);
-        setNewEvent({ name: "", date: "", location: "", division: "HSBBQ", description: "" });
-        fetchEvents();
+        setNewTeam({ name: "", state: "", division: "HSBBQ", coach: "" });
+        fetchTeams();
       } else {
-        alert("Failed to create event: " + json.error);
+        alert("Failed to create team: " + json.error);
       }
     } catch (err) {
-      console.error("Error creating event:", err);
-      alert("Failed to create event");
+      console.error("Error creating team:", err);
+      alert("Failed to create team");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  async function handleDeleteEvent(eventId: string) {
+  async function handleDeleteTeam(teamId: string) {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`/api/events?id=${eventId}`, {
+      const res = await fetch(`/api/teams?id=${teamId}`, {
         method: "DELETE",
       });
       const json = await res.json();
 
       if (json.success) {
         setDeleteConfirm(null);
-        fetchEvents();
+        fetchTeams();
       } else {
-        alert("Failed to delete event: " + json.error);
+        alert("Failed to delete team: " + json.error);
       }
     } catch (err) {
-      console.error("Error deleting event:", err);
-      alert("Failed to delete event");
+      console.error("Error deleting team:", err);
+      alert("Failed to delete team");
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  const filteredEvents = events.filter((event) => {
+  const filteredTeams = teams.filter((team) => {
     const matchesSearch =
       searchQuery === "" ||
-      event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || event.status === statusFilter;
-    return matchesSearch && matchesStatus;
+      team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      team.schoolName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      team.state?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDivision =
+      divisionFilter === "all" || team.division === divisionFilter;
+    return matchesSearch && matchesDivision;
   });
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "live":
-        return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full bg-red-50 text-red-600 border border-red-100">
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            Live
-          </span>
-        );
-      case "completed":
-        return (
-          <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-600">
-            Completed
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-1 text-xs font-medium rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100">
-            Upcoming
-          </span>
-        );
+  const getDivisionBadge = (division: string) => {
+    if (division === "HSBBQ") {
+      return (
+        <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-americana-blue/10 text-americana-blue">
+          HSBBQ
+        </span>
+      );
     }
+    return (
+      <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-brisket-brown/10 text-brisket-brown">
+        MSBBQ
+      </span>
+    );
   };
 
   return (
@@ -151,9 +141,9 @@ export default function AdminEventsPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Events</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Teams</h1>
           <p className="text-slate-500 mt-1">
-            Manage competition events and schedules
+            Manage BBQ competition teams
           </p>
         </div>
         <button
@@ -161,7 +151,7 @@ export default function AdminEventsPage() {
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-americana-blue text-white rounded-xl font-medium text-sm hover:bg-americana-blue/90 transition-colors shadow-lg shadow-americana-blue/25"
         >
           <Plus className="w-4 h-4" />
-          Create Event
+          Add Team
         </button>
       </div>
 
@@ -175,54 +165,53 @@ export default function AdminEventsPage() {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search events..."
+              placeholder="Search teams..."
               className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue text-slate-900 placeholder:text-slate-400"
             />
           </div>
 
-          {/* Status Filter */}
+          {/* Division Filter */}
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              value={divisionFilter}
+              onChange={(e) => setDivisionFilter(e.target.value)}
               className="appearance-none pl-9 pr-10 py-2.5 bg-slate-50 border-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue text-slate-700 text-sm font-medium cursor-pointer"
             >
-              <option value="all">All Status</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="live">Live</option>
-              <option value="completed">Completed</option>
+              <option value="all">All Divisions</option>
+              <option value="HSBBQ">High School (HSBBQ)</option>
+              <option value="MSBBQ">Middle School (MSBBQ)</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Events List */}
+      {/* Teams List */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 className="w-8 h-8 animate-spin text-americana-blue mb-3" />
-            <p className="text-slate-500 text-sm">Loading events...</p>
+            <p className="text-slate-500 text-sm">Loading teams...</p>
           </div>
-        ) : filteredEvents.length === 0 ? (
+        ) : filteredTeams.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-              <Calendar className="w-7 h-7 text-slate-400" />
+              <Users className="w-7 h-7 text-slate-400" />
             </div>
-            <p className="text-slate-600 font-medium">No events found</p>
+            <p className="text-slate-600 font-medium">No teams found</p>
             <p className="text-slate-400 text-sm mt-1">
-              {searchQuery || statusFilter !== "all"
+              {searchQuery || divisionFilter !== "all"
                 ? "Try adjusting your filters"
-                : "Create your first event to get started"}
+                : "Add your first team to get started"}
             </p>
-            {!searchQuery && statusFilter === "all" && (
-              <Link
-                href="/admin/events/new"
+            {!searchQuery && divisionFilter === "all" && (
+              <button
+                onClick={() => setShowAddModal(true)}
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
-                Create Event
-              </Link>
+                Add Team
+              </button>
             )}
           </div>
         ) : (
@@ -231,19 +220,16 @@ export default function AdminEventsPage() {
               <thead>
                 <tr className="border-b border-slate-100">
                   <th className="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Event
-                  </th>
-                  <th className="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Date
+                    Team
                   </th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider hidden md:table-cell">
-                    Location
+                    School
                   </th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider hidden lg:table-cell">
-                    Division
+                    State
                   </th>
                   <th className="text-left px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                    Status
+                    Division
                   </th>
                   <th className="text-right px-6 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
                     Actions
@@ -251,64 +237,63 @@ export default function AdminEventsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filteredEvents.map((event) => (
+                {filteredTeams.map((team) => (
                   <tr
-                    key={event.id}
+                    key={team.id}
                     className="group hover:bg-slate-50/50 transition-colors"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-americana-blue to-[#1e2a5e] flex items-center justify-center text-white">
-                          <Calendar className="w-5 h-5" />
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brisket-brown to-brisket-brown-light flex items-center justify-center text-white">
+                          <Users className="w-5 h-5" />
                         </div>
                         <div>
                           <p className="font-medium text-slate-900">
-                            {event.name}
+                            {team.name}
                           </p>
-                          {event.registeredTeams !== undefined && (
-                            <div className="flex items-center gap-1 text-xs text-slate-500 mt-0.5">
-                              <Users className="w-3.5 h-3.5" />
-                              {event.registeredTeams} teams registered
-                            </div>
+                          {team.coach && (
+                            <p className="text-xs text-slate-500 mt-0.5">
+                              Coach: {team.coach}
+                            </p>
                           )}
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-slate-700">
-                        {new Date(event.date).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </p>
-                    </td>
                     <td className="px-6 py-4 hidden md:table-cell">
-                      <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                        <MapPin className="w-4 h-4" />
-                        {event.location || "TBD"}
-                      </div>
+                      {team.schoolName ? (
+                        <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                          <School className="w-4 h-4" />
+                          {team.schoolName}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-sm">-</span>
+                      )}
                     </td>
                     <td className="px-6 py-4 hidden lg:table-cell">
-                      <span className="inline-flex px-2.5 py-1 text-xs font-semibold rounded-lg bg-americana-blue/10 text-americana-blue">
-                        {event.division}
-                      </span>
+                      {team.state ? (
+                        <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                          <MapPin className="w-4 h-4" />
+                          {team.state}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-sm">-</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4">{getStatusBadge(event.status)}</td>
+                    <td className="px-6 py-4">{getDivisionBadge(team.division)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1">
                         <Link
-                          href={`/leaderboard/${event.id}`}
+                          href={`/teams/${team.id}`}
                           target="_blank"
                           className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-                          title="View leaderboard"
+                          title="View team"
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Link>
                         <button
-                          onClick={() => setDeleteConfirm(event.id)}
+                          onClick={() => setDeleteConfirm(team.id)}
                           className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Delete event"
+                          title="Delete team"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -323,18 +308,18 @@ export default function AdminEventsPage() {
       </div>
 
       {/* Footer Note */}
-      {filteredEvents.length > 0 && (
+      {filteredTeams.length > 0 && (
         <p className="text-center text-sm text-slate-400">
-          Showing {filteredEvents.length} of {events.length} events
+          Showing {filteredTeams.length} of {teams.length} teams
         </p>
       )}
 
-      {/* Add Event Modal */}
+      {/* Add Team Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-slate-900">Create New Event</h2>
+              <h2 className="text-xl font-bold text-slate-900">Add New Team</h2>
               <button
                 onClick={() => setShowAddModal(false)}
                 className="p-2 hover:bg-slate-100 rounded-lg"
@@ -343,44 +328,31 @@ export default function AdminEventsPage() {
               </button>
             </div>
 
-            <form onSubmit={handleAddEvent} className="space-y-4">
+            <form onSubmit={handleAddTeam} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Event Name *
+                  Team Name *
                 </label>
                 <input
                   type="text"
-                  value={newEvent.name}
-                  onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
+                  value={newTeam.name}
+                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
                   required
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
-                  placeholder="e.g., Texas State Championship"
+                  placeholder="e.g., Smokin' Rebels"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Date *
-                </label>
-                <input
-                  type="date"
-                  value={newEvent.date}
-                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Location
+                  State
                 </label>
                 <input
                   type="text"
-                  value={newEvent.location}
-                  onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
+                  value={newTeam.state}
+                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
-                  placeholder="e.g., Fort Worth, TX"
+                  placeholder="e.g., TX"
                 />
               </div>
 
@@ -389,8 +361,8 @@ export default function AdminEventsPage() {
                   Division
                 </label>
                 <select
-                  value={newEvent.division}
-                  onChange={(e) => setNewEvent({ ...newEvent, division: e.target.value })}
+                  value={newTeam.division}
+                  onChange={(e) => setNewTeam({ ...newTeam, division: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
                 >
                   <option value="HSBBQ">High School (HSBBQ)</option>
@@ -400,14 +372,14 @@ export default function AdminEventsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Description
+                  Coach / Advisor
                 </label>
-                <textarea
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue resize-none"
-                  placeholder="Brief description of the event..."
+                <input
+                  type="text"
+                  value={newTeam.coach}
+                  onChange={(e) => setNewTeam({ ...newTeam, coach: e.target.value })}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
+                  placeholder="Coach name"
                 />
               </div>
 
@@ -424,7 +396,7 @@ export default function AdminEventsPage() {
                   disabled={isSubmitting}
                   className="flex-1 px-4 py-2.5 bg-americana-blue text-white rounded-xl font-medium hover:bg-americana-blue/90 disabled:opacity-50"
                 >
-                  {isSubmitting ? "Creating..." : "Create Event"}
+                  {isSubmitting ? "Adding..." : "Add Team"}
                 </button>
               </div>
             </form>
@@ -439,9 +411,9 @@ export default function AdminEventsPage() {
             <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-7 h-7 text-red-600" />
             </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Delete Event?</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-2">Delete Team?</h2>
             <p className="text-slate-500 mb-6">
-              This action cannot be undone. This will permanently delete the event from Airtable.
+              This action cannot be undone. This will permanently delete the team from Airtable.
             </p>
             <div className="flex gap-3">
               <button
@@ -451,7 +423,7 @@ export default function AdminEventsPage() {
                 Cancel
               </button>
               <button
-                onClick={() => handleDeleteEvent(deleteConfirm)}
+                onClick={() => handleDeleteTeam(deleteConfirm)}
                 disabled={isSubmitting}
                 className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 disabled:opacity-50"
               >

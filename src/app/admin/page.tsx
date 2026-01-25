@@ -36,18 +36,21 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const eventsRes = await fetch("/api/events");
-        const eventsJson = await eventsRes.json();
-        const eventsData = eventsJson.success ? eventsJson.data : [];
+        const res = await fetch("/api/stats");
+        const json = await res.json();
 
-        setStats({
-          events: eventsData.length || 0,
-          teams: 0,
-          schools: 0,
-          students: 0,
-          loading: false,
-          error: null,
-        });
+        if (json.success && json.data) {
+          setStats({
+            events: json.data.events || 0,
+            teams: json.data.teams || 0,
+            schools: json.data.schools || 0,
+            students: json.data.states || 0, // Using states count for now
+            loading: false,
+            error: null,
+          });
+        } else {
+          throw new Error("Failed to fetch stats");
+        }
       } catch {
         setStats((prev) => ({
           ...prev,
@@ -86,32 +89,32 @@ export default function AdminDashboard() {
       gradient: "from-amber-500 to-orange-500",
     },
     {
-      label: "Students",
+      label: "States",
       value: stats.students,
       icon: GraduationCap,
-      href: "/admin/students",
-      trend: "Growing",
+      href: "/admin/teams",
+      trend: "Active",
       gradient: "from-emerald-500 to-emerald-600",
     },
   ];
 
   const quickActions = [
     {
-      label: "Create Event",
-      description: "Add a new competition",
-      href: "/admin/events/new",
+      label: "Manage Events",
+      description: "Add or view competitions",
+      href: "/admin/events",
       icon: Calendar,
     },
     {
-      label: "Add Team",
-      description: "Register a new team",
-      href: "/admin/teams/new",
+      label: "Manage Teams",
+      description: "Add or view teams",
+      href: "/admin/teams",
       icon: Users,
     },
     {
-      label: "New School",
-      description: "Add a school charter",
-      href: "/admin/charters/new",
+      label: "Manage Schools",
+      description: "View school charters",
+      href: "/admin/charters",
       icon: School,
     },
     {
