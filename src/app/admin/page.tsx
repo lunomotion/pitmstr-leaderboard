@@ -37,7 +37,8 @@ export default function AdminDashboard() {
     async function fetchStats() {
       try {
         const eventsRes = await fetch("/api/events");
-        const eventsData = await eventsRes.json();
+        const eventsJson = await eventsRes.json();
+        const eventsData = eventsJson.success ? eventsJson.data : [];
 
         setStats({
           events: eventsData.length || 0,
