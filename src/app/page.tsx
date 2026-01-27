@@ -170,43 +170,35 @@ export default function Home() {
       <Header />
 
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-americana-blue via-americana-blue-light to-white/90 text-white py-10 md:py-16 px-4 overflow-hidden">
-        {/* Subtle gradient overlay for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-americana-blue/20 to-white/30" />
+      <section className="relative text-white py-6 md:py-10 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 30%, #1f1f1f 60%, #252525 100%)' }}>
+        {/* Subtle turtle-shell / hexagonal pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        {/* Bottom fade to page background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1a1a1a]/40" />
 
         <div className="relative max-w-7xl mx-auto text-center">
-          {/* Logos Section */}
-          <div className="flex items-center justify-center gap-6 md:gap-10 mb-8">
-            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg">
-              <Image
-                src="/images/nhsbbqa-logo.png"
-                alt="NHSBBQA Logo"
-                width={200}
-                height={140}
-                className="h-24 md:h-32 w-auto"
-                priority
-              />
-            </div>
-            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-lg">
-              <Image
-                src="/images/pitmstr-flame.png"
-                alt="PITMSTR Logo"
-                width={120}
-                height={150}
-                className="h-24 md:h-32 w-auto"
-                priority
-              />
-            </div>
+          {/* PITMSTR P Logo - Centered with black background */}
+          <div className="flex items-center justify-center mb-8">
+            <Image
+              src="/images/pitmstr-flame-nobg.png"
+              alt="PITMSTR Logo"
+              width={100}
+              height={125}
+              className="h-24 md:h-32 w-auto"
+              priority
+            />
           </div>
 
           {/* Tagline */}
           <p
-            className="text-2xl md:text-4xl text-bbq-red font-bold mb-3 drop-shadow-lg"
+            className="text-3xl md:text-5xl text-bbq-red font-bold mb-3"
             style={{ fontFamily: "var(--font-permanent-marker)" }}
           >
             WHERE DREAMS IGNITE!
           </p>
-          <p className="text-white max-w-2xl mx-auto mb-8 text-sm md:text-base drop-shadow-md">
+          <p className="text-white/70 max-w-2xl mx-auto mb-8 text-sm md:text-base">
             Real-time BBQ competition leaderboard for the National High School
             BBQ Association. Track teams, scores, and rankings across events
             nationwide.
@@ -394,27 +386,14 @@ export default function Home() {
       <footer className="bg-smoke-black text-white py-10 px-4 mt-12">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center gap-6">
-            {/* Footer Logos */}
-            <div className="flex items-center gap-6">
-              <div className="bg-white p-3 rounded-xl">
-                <Image
-                  src="/images/nhsbbqa-logo.png"
-                  alt="NHSBBQA"
-                  width={120}
-                  height={80}
-                  className="h-14 w-auto"
-                />
-              </div>
-              <div className="bg-white p-3 rounded-xl">
-                <Image
-                  src="/images/pitmstr-flame.png"
-                  alt="PITMSTR"
-                  width={60}
-                  height={75}
-                  className="h-14 w-auto"
-                />
-              </div>
-            </div>
+            {/* Footer Logo */}
+            <Image
+              src="/images/pitmstr-flame-nobg.png"
+              alt="PITMSTR"
+              width={60}
+              height={75}
+              className="h-14 w-auto"
+            />
             <p
               className="text-sm text-white/80 text-center font-semibold tracking-wider"
               style={{ fontFamily: "var(--font-oswald)" }}

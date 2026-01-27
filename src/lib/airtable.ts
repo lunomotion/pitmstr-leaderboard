@@ -17,6 +17,7 @@ const TABLES = {
   CHARTER: "Charter", // Schools
   STUDENTS: "Students", // Team Members
   TURN_INS: "Turn-Ins",
+  REPORT_CARDS: "BBQ Report Cards",
   DIVISIONS: "Divisions",
   CATEGORIES: "Categories",
   STATES: "States",
@@ -264,7 +265,7 @@ export async function getEvent(eventId: string): Promise<Event | null> {
 }
 
 // Fetch leaderboard for an event
-// Note: This fetches team data from Turn-Ins since Report Cards may be restricted
+// Gets teams from the Event's linked Teams field, scores from BBQ Report Cards
 export async function getEventLeaderboard(
   eventId: string,
   category: Category = "Overall"
@@ -272,63 +273,85 @@ export async function getEventLeaderboard(
   try {
     await Promise.all([loadDivisionsCache(), loadCategoriesCache(), loadStatesCache()]);
 
-    // Fetch all turn-ins and filter in memory (Airtable formula doesn't work well with linked records)
-    const allTurnIns = await getBase()(TABLES.TURN_INS)
-      .select({ maxRecords: 500 })
+    // Get the event record to find linked teams
+    const eventRecord = await getBase()(TABLES.EVENTS).find(eventId);
+    const teamIds = getLinkedIds(eventRecord.get("Teams"));
+
+    if (teamIds.length === 0) return [];
+
+    // Fetch all Report Cards and filter for this event
+    const allReportCards = await getBase()(TABLES.REPORT_CARDS)
+      .select({ maxRecords: 1000 })
       .all();
 
-    // Filter turn-ins for this event
-    const turnInRecords = allTurnIns.filter((record) => {
+    const eventReportCards = allReportCards.filter((record) => {
       const eventIds = getLinkedIds(record.get("Event"));
       return eventIds.includes(eventId);
     });
 
-    // Get unique team IDs from turn-ins
-    const teamIds = new Set<string>();
-    turnInRecords.forEach((record) => {
-      const teamId = getFirstLinkedId(record.get("Team"));
-      if (teamId) teamIds.add(teamId);
-    });
+    // Build score data per team, grouped by category
+    const teamScores = new Map<string, { total: number; count: number; categoryScores: Record<string, number> }>();
 
-    // Fetch team details
+    for (const rc of eventReportCards) {
+      const rcTeamId = getFirstLinkedId(rc.get("Team"));
+      if (!rcTeamId || !teamIds.includes(rcTeamId)) continue;
+
+      const totalScore = (rc.get("Total Score") as number) || 0;
+      const categoryIds = getLinkedIds(rc.get("Category"));
+      const categoryName = categoryIds.length > 0
+        ? lookupCache.categories.get(categoryIds[0]) || "Unknown"
+        : "Unknown";
+
+      // If filtering by category, skip report cards for other categories
+      if (category !== "Overall" && categoryName !== category) continue;
+
+      if (!teamScores.has(rcTeamId)) {
+        teamScores.set(rcTeamId, { total: 0, count: 0, categoryScores: {} });
+      }
+
+      const data = teamScores.get(rcTeamId)!;
+      data.total += totalScore;
+      data.count += 1;
+
+      // Track per-category scores
+      if (!data.categoryScores[categoryName]) {
+        data.categoryScores[categoryName] = 0;
+      }
+      data.categoryScores[categoryName] += totalScore;
+    }
+
+    // Fetch team details and build entries
     const entries: LeaderboardEntry[] = [];
-    let rank = 1;
 
     for (const teamId of teamIds) {
       try {
         const team = await getTeam(teamId);
         if (!team) continue;
 
-        // Get turn-ins for this team in this event
-        const teamTurnIns = turnInRecords.filter((r) => {
-          const tid = getFirstLinkedId(r.get("Team"));
-          return tid === teamId;
-        });
-
-        // If filtering by category, check if team has turn-in for that category
-        if (category !== "Overall") {
-          const hasCategory = teamTurnIns.some((turnIn) => {
-            const catIds = getLinkedIds(turnIn.get("Category"));
-            return catIds.some((catId) => lookupCache.categories.get(catId) === category);
-          });
-          if (!hasCategory) continue;
-        }
+        const scoreData = teamScores.get(teamId);
+        const score = scoreData ? scoreData.total / scoreData.count : 0;
 
         entries.push({
-          rank: rank++,
+          rank: 0, // Will be set after sorting
           teamId: team.id,
           teamName: team.name,
           schoolName: team.schoolName || "",
           schoolId: team.schoolId,
           state: team.state || "",
           division: team.division,
-          score: 0, // Score would come from Report Cards which may be restricted
-          categoryScores: {},
+          score: Math.round(score * 100) / 100,
+          categoryScores: scoreData?.categoryScores || {},
         });
       } catch (err) {
         console.error(`Error fetching team ${teamId}:`, err);
       }
     }
+
+    // Sort by score descending, then assign ranks
+    entries.sort((a, b) => b.score - a.score);
+    entries.forEach((entry, index) => {
+      entry.rank = index + 1;
+    });
 
     return entries;
   } catch (error) {
