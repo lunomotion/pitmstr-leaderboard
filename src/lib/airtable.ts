@@ -290,7 +290,7 @@ export async function getEventLeaderboard(
     });
 
     // Build score data per team, grouped by category
-    const teamScores = new Map<string, { total: number; count: number; categoryScores: Record<string, number> }>();
+    const teamScores = new Map<string, { total: number; count: number; categoryTotals: Record<string, { total: number; count: number }> }>();
 
     for (const rc of eventReportCards) {
       const rcTeamId = getFirstLinkedId(rc.get("Team"));
@@ -306,7 +306,7 @@ export async function getEventLeaderboard(
       if (category !== "Overall" && categoryName !== category) continue;
 
       if (!teamScores.has(rcTeamId)) {
-        teamScores.set(rcTeamId, { total: 0, count: 0, categoryScores: {} });
+        teamScores.set(rcTeamId, { total: 0, count: 0, categoryTotals: {} });
       }
 
       const data = teamScores.get(rcTeamId)!;
@@ -314,10 +314,11 @@ export async function getEventLeaderboard(
       data.count += 1;
 
       // Track per-category scores
-      if (!data.categoryScores[categoryName]) {
-        data.categoryScores[categoryName] = 0;
+      if (!data.categoryTotals[categoryName]) {
+        data.categoryTotals[categoryName] = { total: 0, count: 0 };
       }
-      data.categoryScores[categoryName] += totalScore;
+      data.categoryTotals[categoryName].total += totalScore;
+      data.categoryTotals[categoryName].count += 1;
     }
 
     // Fetch team details and build entries
@@ -340,7 +341,14 @@ export async function getEventLeaderboard(
           state: team.state || "",
           division: team.division,
           score: Math.round(score * 100) / 100,
-          categoryScores: scoreData?.categoryScores || {},
+          categoryScores: scoreData
+            ? Object.fromEntries(
+                Object.entries(scoreData.categoryTotals).map(([cat, d]) => [
+                  cat,
+                  { score: Math.round((d.total / d.count) * 100) / 100, rank: 0 },
+                ])
+              )
+            : {},
         });
       } catch (err) {
         console.error(`Error fetching team ${teamId}:`, err);
