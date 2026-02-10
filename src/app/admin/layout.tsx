@@ -27,11 +27,13 @@ import {
   ChevronRight,
   ExternalLink,
   Settings,
+  UserCog,
 } from "lucide-react";
 import { useState } from "react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/users", label: "User Management", icon: UserCog },
   { href: "/admin/events", label: "Events", icon: Calendar },
   { href: "/admin/teams", label: "Teams", icon: Users },
   { href: "/admin/charters", label: "Schools", icon: School },
