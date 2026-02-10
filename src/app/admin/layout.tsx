@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { SignOutButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -59,21 +60,9 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(true);
   const [lookupsOpen, setLookupsOpen] = useState(false);
-
-  // Don't apply layout to login page
-  if (pathname === "/admin/login") {
-    return <>{children}</>;
-  }
-
-  const handleLogout = async () => {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
-    router.refresh();
-  };
 
   const NavLink = ({
     href,
@@ -251,13 +240,14 @@ export default function AdminLayout({
               <ExternalLink className="w-[18px] h-[18px]" />
               <span>View Live Site</span>
             </Link>
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
-            >
-              <LogOut className="w-[18px] h-[18px]" />
-              <span>Sign Out</span>
-            </button>
+            <SignOutButton redirectUrl="/">
+              <button
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium text-white/60 hover:text-red-300 hover:bg-red-500/10 transition-all duration-300"
+              >
+                <LogOut className="w-[18px] h-[18px]" />
+                <span>Sign Out</span>
+              </button>
+            </SignOutButton>
           </div>
         </div>
       </aside>

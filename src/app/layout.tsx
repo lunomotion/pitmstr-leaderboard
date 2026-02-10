@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Open_Sans, Oswald, Permanent_Marker } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -61,7 +62,9 @@ export default function RootLayout({
         className={`${openSans.variable} ${oswald.variable} ${permanentMarker.variable} antialiased`}
         style={{ fontFamily: "var(--font-open-sans), sans-serif" }}
       >
-        {children}
+        <ClerkProvider>
+          {children}
+        </ClerkProvider>
       </body>
     </html>
   );

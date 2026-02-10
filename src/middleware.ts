@@ -1,23 +1,39 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+// Public routes — anyone can access without signing in
+const isPublicRoute = createRouteMatcher([
+  // Public pages
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/leaderboard(.*)",
+  "/events(.*)",
+  "/teams(.*)",
+  "/schools(.*)",
+  "/knowledge-base(.*)",
 
-  // Only protect /admin routes (but not /admin/login)
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    const adminSession = request.cookies.get("admin_session");
+  // Public API routes (read-only data)
+  "/api/events(.*)",
+  "/api/leaderboard(.*)",
+  "/api/stats(.*)",
+  "/api/teams/(.*)",
+  "/api/schools/(.*)",
 
-    if (!adminSession || adminSession.value !== "authenticated") {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
+  // Clerk webhook (called by Clerk servers, not users)
+  "/api/webhooks/clerk",
+]);
+
+export default clerkMiddleware(async (auth, request) => {
+  if (!isPublicRoute(request)) {
+    // Not a public route — user must be signed in
+    await auth.protect();
   }
-
-  return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    // Match all routes except static files and Next.js internals
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };
