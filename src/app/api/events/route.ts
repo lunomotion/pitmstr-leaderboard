@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEvents } from "@/lib/airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 import type { EventStatus, Division } from "@/lib/types";
 import Airtable from "airtable";
 
@@ -51,9 +52,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a new event
+// Create a new event (admin only)
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requirePermission("events:create");
+    if (isAuthError(authResult)) return authResult;
+
     const body = await request.json();
     const { name, date, location, city, state, division, description, categories } = body;
 
@@ -98,9 +102,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Delete an event
+// Delete an event (admin only)
 export async function DELETE(request: NextRequest) {
   try {
+    const authResult = await requirePermission("events:delete");
+    if (isAuthError(authResult)) return authResult;
+
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get("id");
 

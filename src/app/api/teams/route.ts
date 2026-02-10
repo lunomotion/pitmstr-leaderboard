@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchTeams } from "@/lib/airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 import Airtable from "airtable";
 
 // Lazy initialization of Airtable base
@@ -43,9 +44,12 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a new team
+// Create a new team (admin + teacher)
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await requirePermission("teams:create");
+    if (isAuthError(authResult)) return authResult;
+
     const body = await request.json();
     const { name, schoolId, division, coach, state } = body;
 
@@ -87,9 +91,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Delete a team
+// Delete a team (admin only)
 export async function DELETE(request: NextRequest) {
   try {
+    const authResult = await requirePermission("teams:delete");
+    if (isAuthError(authResult)) return authResult;
+
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get("id");
 
