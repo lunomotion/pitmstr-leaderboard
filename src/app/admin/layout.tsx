@@ -1,7 +1,7 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { SignOutButton } from "@clerk/nextjs";
+import { usePathname, useRouter } from "next/navigation";
+import { SignOutButton, useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -62,9 +62,26 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isLoaded } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dataOpen, setDataOpen] = useState(true);
   const [lookupsOpen, setLookupsOpen] = useState(false);
+
+  // Block non-admin users from accessing admin pages
+  const role = (user?.publicMetadata as Record<string, unknown>)?.role;
+  if (isLoaded && role !== "admin") {
+    router.push("/dashboard");
+    return null;
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-slate-300 border-t-slate-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const NavLink = ({
     href,
