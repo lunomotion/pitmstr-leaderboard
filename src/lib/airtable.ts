@@ -738,3 +738,119 @@ export async function logAuditEvent(
     console.error("Error logging audit event:", error);
   }
 }
+
+// ============================================================
+// SEARCH: SCHOOLS & STUDENTS
+// ============================================================
+
+// Search schools (Charter table) — mirrors searchTeams() pattern
+export async function searchSchools(query: string): Promise<School[]> {
+  try {
+    await loadStatesCache();
+
+    const lowerQuery = query.trim().toLowerCase();
+    const returnAll = lowerQuery === "" || lowerQuery === " ";
+
+    const records = await getBase()(TABLES.CHARTER)
+      .select({ maxRecords: returnAll ? 200 : 50 })
+      .all();
+
+    const schools: School[] = [];
+
+    for (const record of records) {
+      const charterName = (record.get("Charter Name") as string) || "";
+      const city = (record.get("City") as string) || "";
+
+      const stateId = getFirstLinkedId(record.get("State"));
+      const stateInfo = await getStateInfo(stateId);
+      const stateName = stateInfo?.abbreviation || stateInfo?.name || "";
+
+      if (
+        returnAll ||
+        charterName.toLowerCase().includes(lowerQuery) ||
+        city.toLowerCase().includes(lowerQuery) ||
+        stateName.toLowerCase().includes(lowerQuery)
+      ) {
+        schools.push({
+          id: record.id,
+          createdTime: record._rawJson.createdTime,
+          name: charterName,
+          city: city,
+          state: stateName,
+          district: (record.get("County") as string) || undefined,
+          logoUrl: getImageUrl(record.get("Charter Photo")),
+          teams: getLinkedIds(record.get("Teams")),
+        });
+
+        if (!returnAll && schools.length >= 20) break;
+      }
+    }
+
+    return schools;
+  } catch (error) {
+    console.error("Error searching schools:", error);
+    throw error;
+  }
+}
+
+// Search students — returns TeamMember[] with teamName and schoolName resolved
+export async function searchStudents(query: string): Promise<TeamMember[]> {
+  try {
+    const lowerQuery = query.trim().toLowerCase();
+    const returnAll = lowerQuery === "" || lowerQuery === " ";
+
+    const records = await getBase()(TABLES.STUDENTS)
+      .select({ maxRecords: returnAll ? 200 : 50 })
+      .all();
+
+    const students: TeamMember[] = [];
+
+    for (const record of records) {
+      const memberName = (record.get("Member Name") as string) || "";
+      const email = (record.get("Email") as string) || "";
+
+      if (
+        returnAll ||
+        memberName.toLowerCase().includes(lowerQuery) ||
+        email.toLowerCase().includes(lowerQuery)
+      ) {
+        const teamId = getFirstLinkedId(record.get("Team")) || "";
+
+        // Resolve team name and school name
+        let teamName: string | undefined;
+        let schoolName: string | undefined;
+
+        if (teamId) {
+          try {
+            const team = await getTeam(teamId);
+            if (team) {
+              teamName = team.name;
+              schoolName = team.schoolName;
+            }
+          } catch {
+            // ignore — team lookup is best-effort
+          }
+        }
+
+        students.push({
+          id: record.id,
+          createdTime: record._rawJson.createdTime,
+          name: memberName,
+          teamId,
+          role: (record.get("Role") as string) || undefined,
+          photoUrl: getImageUrl(record.get("Photo")),
+          email: email || undefined,
+          teamName,
+          schoolName,
+        });
+
+        if (!returnAll && students.length >= 20) break;
+      }
+    }
+
+    return students;
+  } catch (error) {
+    console.error("Error searching students:", error);
+    throw error;
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Users, Search, ChevronDown, Check, Loader2 } from "lucide-react";
+import { Users, Search, ChevronDown, Check, Loader2, School } from "lucide-react";
 import { ROLES, ROLE_LABELS, type Role } from "@/lib/roles";
 
 interface User {
@@ -86,12 +86,110 @@ function RoleDropdown({
   );
 }
 
+interface SchoolOption {
+  id: string;
+  name: string;
+  state: string;
+}
+
+function SchoolDropdown({
+  user,
+  schools,
+  onSchoolChange,
+}: {
+  user: User;
+  schools: SchoolOption[];
+  onSchoolChange: (userId: string, schoolId: string) => Promise<void>;
+}) {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  const currentSchool = schools.find((s) => s.id === user.schoolId);
+
+  const handleSelect = async (schoolId: string) => {
+    setSaving(true);
+    setOpen(false);
+    await onSchoolChange(user.id, schoolId);
+    setSaving(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm border transition-all ${
+          currentSchool
+            ? "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
+            : "border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200"
+        }`}
+        disabled={saving}
+      >
+        {saving ? (
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        ) : (
+          <>
+            <School className="w-3.5 h-3.5" />
+            <span className="max-w-[140px] truncate">
+              {currentSchool ? currentSchool.name : "Assign School"}
+            </span>
+            <ChevronDown className="w-3.5 h-3.5" />
+          </>
+        )}
+      </button>
+
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-slate-200 rounded-xl shadow-lg py-1 min-w-[260px] max-h-64 overflow-y-auto">
+            {schools.map((school) => (
+              <button
+                key={school.id}
+                onClick={() => handleSelect(school.id)}
+                className="w-full flex items-center justify-between px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <span className="truncate">
+                  {school.name}
+                  {school.state && (
+                    <span className="text-slate-400 ml-1">({school.state})</span>
+                  )}
+                </span>
+                {user.schoolId === school.id && (
+                  <Check className="w-4 h-4 text-green-500 flex-shrink-0 ml-2" />
+                )}
+              </button>
+            ))}
+            {schools.length === 0 && (
+              <p className="px-4 py-3 text-sm text-slate-400">No schools loaded</p>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterRole, setFilterRole] = useState<string>("all");
   const [totalCount, setTotalCount] = useState(0);
+  const [schools, setSchools] = useState<SchoolOption[]>([]);
+
+  // Fetch schools list for the dropdown
+  useEffect(() => {
+    fetch("/api/schools")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) {
+          setSchools(data.data.map((s: SchoolOption) => ({ id: s.id, name: s.name, state: s.state })));
+        }
+      })
+      .catch((err) => console.error("Failed to fetch schools:", err));
+  }, []);
 
   const fetchUsers = useCallback(async (query?: string) => {
     setLoading(true);
@@ -141,6 +239,26 @@ export default function AdminUsersPage() {
       }
     } catch (error) {
       console.error("Failed to update role:", error);
+    }
+  };
+
+  const handleSchoolChange = async (userId: string, schoolId: string) => {
+    try {
+      const res = await fetch(`/api/users/${userId}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ schoolId }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setUsers((prev) =>
+          prev.map((u) => (u.id === userId ? { ...u, schoolId } : u))
+        );
+      }
+    } catch (error) {
+      console.error("Failed to update school:", error);
     }
   };
 
@@ -231,6 +349,9 @@ export default function AdminUsersPage() {
                   <th className="text-left px-6 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Last Sign In
                   </th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider hidden lg:table-cell">
+                    School
+                  </th>
                   <th className="text-right px-6 py-3 text-xs font-semibold text-slate-400 uppercase tracking-wider">
                     Role
                   </th>
@@ -277,6 +398,13 @@ export default function AdminUsersPage() {
                       {user.lastSignInAt
                         ? new Date(user.lastSignInAt).toLocaleDateString()
                         : "Never"}
+                    </td>
+                    <td className="px-6 py-4 hidden lg:table-cell">
+                      <SchoolDropdown
+                        user={user}
+                        schools={schools}
+                        onSchoolChange={handleSchoolChange}
+                      />
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end">

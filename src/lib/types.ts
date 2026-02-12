@@ -79,6 +79,8 @@ export interface TeamMember extends AirtableRecord {
   phone?: string;
   shirtSize?: string;
   allergies?: string;
+  teamName?: string;
+  schoolName?: string;
 }
 
 // Score entry for a team at an event
