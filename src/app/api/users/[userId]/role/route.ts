@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { clerkClient } from "@clerk/nextjs/server";
 import { requirePermission, isAuthError } from "@/lib/auth";
+import { logAuditEvent, updateUserRole } from "@/lib/airtable";
 import { ROLES, type Role } from "@/lib/roles";
 
 const validRoles = Object.values(ROLES);
@@ -47,6 +48,17 @@ export async function PATCH(
     // Update in Clerk
     await client.users.updateUserMetadata(userId, {
       publicMetadata: updatedMetadata,
+    });
+
+    // Sync role to Airtable
+    if (role) {
+      await updateUserRole(userId, role, { schoolId, stateId });
+    }
+
+    // Audit log
+    await logAuditEvent(authResult.userId, "role.assigned", "user", userId, {
+      role,
+      targetEmail: user.emailAddresses[0]?.emailAddress,
     });
 
     return NextResponse.json({

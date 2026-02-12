@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getEvents } from "@/lib/airtable";
+import { getEvents, logAuditEvent } from "@/lib/airtable";
 import { requirePermission, isAuthError } from "@/lib/auth";
 import type { EventStatus, Division } from "@/lib/types";
 import Airtable from "airtable";
@@ -84,6 +84,8 @@ export async function POST(request: NextRequest) {
 
     const record = await base("Events").create(fields);
 
+    await logAuditEvent(authResult.userId, "event.created", "event", record.id, { name });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -120,6 +122,8 @@ export async function DELETE(request: NextRequest) {
 
     const base = getBase();
     await base("Events").destroy(eventId);
+
+    await logAuditEvent(authResult.userId, "event.deleted", "event", eventId);
 
     return NextResponse.json({
       success: true,

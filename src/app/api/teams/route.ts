@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchTeams } from "@/lib/airtable";
+import { searchTeams, logAuditEvent } from "@/lib/airtable";
 import { requirePermission, isAuthError } from "@/lib/auth";
 import Airtable from "airtable";
 
@@ -74,6 +74,8 @@ export async function POST(request: NextRequest) {
 
     const record = await base("Teams").create(fields);
 
+    await logAuditEvent(authResult.userId, "team.created", "team", record.id, { name });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -109,6 +111,8 @@ export async function DELETE(request: NextRequest) {
 
     const base = getBase();
     await base("Teams").destroy(teamId);
+
+    await logAuditEvent(authResult.userId, "team.deleted", "team", teamId);
 
     return NextResponse.json({
       success: true,

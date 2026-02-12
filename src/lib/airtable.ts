@@ -21,6 +21,8 @@ const TABLES = {
   DIVISIONS: "Divisions",
   CATEGORIES: "Categories",
   STATES: "States",
+  USERS: "Users",
+  AUDIT_LOG: "Audit Log",
 };
 
 // Lazy initialization of Airtable base to avoid build-time errors
@@ -555,5 +557,184 @@ export async function getStates(): Promise<{ name: string; abbreviation: string 
   } catch (error) {
     console.error("Error fetching states:", error);
     return [];
+  }
+}
+
+// ============================================================
+// USER MANAGEMENT (synced with Clerk)
+// ============================================================
+
+export interface AirtableUser {
+  id: string;
+  clerkId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string | null;
+  schoolId: string | null;
+  stateId: string | null;
+  status: string;
+  createdAt: string | null;
+  lastLogin: string | null;
+}
+
+// Create a user record when they sign up via Clerk
+export async function createUser(
+  clerkId: string,
+  email: string,
+  firstName: string,
+  lastName: string
+): Promise<AirtableUser> {
+  try {
+    const record = await getBase()(TABLES.USERS).create({
+      "Clerk ID": clerkId,
+      Email: email,
+      "First Name": firstName,
+      "Last Name": lastName,
+      Status: "pending",
+      "Created At": new Date().toISOString(),
+    });
+
+    return {
+      id: record.id,
+      clerkId: record.get("Clerk ID") as string,
+      email: record.get("Email") as string,
+      firstName: record.get("First Name") as string,
+      lastName: record.get("Last Name") as string,
+      role: null,
+      schoolId: null,
+      stateId: null,
+      status: "pending",
+      createdAt: record.get("Created At") as string,
+      lastLogin: null,
+    };
+  } catch (error) {
+    console.error("Error creating user:", error);
+    throw error;
+  }
+}
+
+// Find a user by their Clerk ID
+export async function getUserByClerkId(
+  clerkId: string
+): Promise<AirtableUser | null> {
+  try {
+    const records = await getBase()(TABLES.USERS)
+      .select({
+        filterByFormula: `{Clerk ID} = '${clerkId}'`,
+        maxRecords: 1,
+      })
+      .all();
+
+    if (records.length === 0) return null;
+
+    const record = records[0];
+    return {
+      id: record.id,
+      clerkId: record.get("Clerk ID") as string,
+      email: record.get("Email") as string,
+      firstName: record.get("First Name") as string,
+      lastName: record.get("Last Name") as string,
+      role: (record.get("Role") as string) || null,
+      schoolId: getFirstLinkedId(record.get("School")) || null,
+      stateId: getFirstLinkedId(record.get("State")) || null,
+      status: (record.get("Status") as string) || "pending",
+      createdAt: record.get("Created At") as string | null,
+      lastLogin: record.get("Last Login") as string | null,
+    };
+  } catch (error) {
+    console.error("Error finding user:", error);
+    return null;
+  }
+}
+
+// Update a user's info (called from webhook on user.updated)
+export async function updateUser(
+  clerkId: string,
+  data: { email?: string; firstName?: string; lastName?: string; lastLogin?: string }
+): Promise<void> {
+  try {
+    const user = await getUserByClerkId(clerkId);
+    if (!user) return;
+
+    const fields: Partial<Airtable.FieldSet> = {};
+    if (data.email) fields["Email"] = data.email;
+    if (data.firstName) fields["First Name"] = data.firstName;
+    if (data.lastName) fields["Last Name"] = data.lastName;
+    if (data.lastLogin) fields["Last Login"] = data.lastLogin;
+
+    await getBase()(TABLES.USERS).update(user.id, fields);
+  } catch (error) {
+    console.error("Error updating user:", error);
+  }
+}
+
+// Update a user's role and status (called from admin dashboard)
+export async function updateUserRole(
+  clerkId: string,
+  role: string,
+  options?: { schoolId?: string; stateId?: string }
+): Promise<void> {
+  try {
+    const user = await getUserByClerkId(clerkId);
+    if (!user) return;
+
+    const fields: Partial<Airtable.FieldSet> = {
+      Role: role,
+      Status: "active",
+    };
+
+    if (options?.schoolId) fields["School"] = [options.schoolId];
+    if (options?.stateId) fields["State"] = [options.stateId];
+
+    await getBase()(TABLES.USERS).update(user.id, fields);
+  } catch (error) {
+    console.error("Error updating user role:", error);
+  }
+}
+
+// Delete/suspend user (called from webhook on user.deleted)
+export async function suspendUser(clerkId: string): Promise<void> {
+  try {
+    const user = await getUserByClerkId(clerkId);
+    if (!user) return;
+
+    await getBase()(TABLES.USERS).update(user.id, { Status: "suspended" });
+  } catch (error) {
+    console.error("Error suspending user:", error);
+  }
+}
+
+// ============================================================
+// AUDIT LOGGING
+// ============================================================
+
+export async function logAuditEvent(
+  userId: string,
+  action: string,
+  targetType: "event" | "team" | "user" | "school",
+  targetId: string,
+  details?: Record<string, unknown>,
+  ipAddress?: string
+): Promise<void> {
+  try {
+    // Find the user's Airtable record to link
+    const user = await getUserByClerkId(userId);
+
+    const fields: Partial<Airtable.FieldSet> = {
+      Timestamp: new Date().toISOString(),
+      Action: action,
+      "Target Type": targetType,
+      "Target ID": targetId,
+    };
+
+    if (user) fields["User"] = [user.id];
+    if (details) fields["Details"] = JSON.stringify(details, null, 2);
+    if (ipAddress) fields["IP Address"] = ipAddress;
+
+    await getBase()(TABLES.AUDIT_LOG).create(fields);
+  } catch (error) {
+    // Don't throw — audit logging should never break the main operation
+    console.error("Error logging audit event:", error);
   }
 }
