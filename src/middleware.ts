@@ -16,8 +16,8 @@ const isPublicRoute = createRouteMatcher([
   "/api/events(.*)",
   "/api/leaderboard(.*)",
   "/api/stats(.*)",
-  "/api/teams/(.*)",
-  "/api/schools/(.*)",
+  "/api/teams(.*)",
+  "/api/schools(.*)",
 
   // Clerk webhook (called by Clerk servers, not users)
   "/api/webhooks/clerk",
