@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, LogIn } from "lucide-react";
 import { useState } from "react";
+import { useUser } from "@clerk/nextjs";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isSignedIn } = useUser();
 
   return (
     <header className="sticky top-0 z-50 bg-smoke-black/95 backdrop-blur-sm border-b border-white/10">
@@ -58,13 +60,22 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Admin button - right side (desktop) */}
+          {/* Sign In / Dashboard button - right side (desktop) */}
           <Link
-            href="/admin"
+            href={isSignedIn ? "/dashboard" : "/sign-in"}
             className="hidden md:flex items-center gap-2 px-4 py-2 bg-bbq-red text-white rounded-lg text-sm font-semibold hover:bg-bbq-red/90 transition-colors"
           >
-            <User className="w-4 h-4" />
-            Admin
+            {isSignedIn ? (
+              <>
+                <User className="w-4 h-4" />
+                Dashboard
+              </>
+            ) : (
+              <>
+                <LogIn className="w-4 h-4" />
+                Sign In
+              </>
+            )}
           </Link>
         </div>
 
@@ -108,12 +119,21 @@ export default function Header() {
                 Knowledge Base
               </Link>
               <Link
-                href="/admin"
+                href={isSignedIn ? "/dashboard" : "/sign-in"}
                 className="mx-4 mt-2 flex items-center justify-center gap-2 px-4 py-3 bg-bbq-red text-white rounded-lg text-sm font-semibold hover:bg-bbq-red/90 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <User className="w-4 h-4" />
-                Admin
+                {isSignedIn ? (
+                  <>
+                    <User className="w-4 h-4" />
+                    Dashboard
+                  </>
+                ) : (
+                  <>
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </>
+                )}
               </Link>
             </nav>
           </div>
