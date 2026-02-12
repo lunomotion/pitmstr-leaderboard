@@ -673,7 +673,7 @@ export async function updateUser(
 export async function updateUserRole(
   clerkId: string,
   role: string,
-  options?: { schoolId?: string; stateId?: string }
+  options?: { schoolId?: string; stateId?: string; teamId?: string }
 ): Promise<void> {
   try {
     const user = await getUserByClerkId(clerkId);
@@ -686,6 +686,7 @@ export async function updateUserRole(
 
     if (options?.schoolId) fields["School"] = [options.schoolId];
     if (options?.stateId) fields["State"] = [options.stateId];
+    if (options?.teamId) fields["Team"] = [options.teamId];
 
     await getBase()(TABLES.USERS).update(user.id, fields);
   } catch (error) {
