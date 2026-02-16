@@ -7,6 +7,7 @@ import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
 import { Calendar, Loader2, Filter, Plus, X, Trash2 } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
+import { formatStateHSBBQ } from "@/lib/format";
 
 export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
@@ -193,7 +194,7 @@ export default function EventsPage() {
                   <option value="all">All States</option>
                   {availableStates.map((state) => (
                     <option key={state} value={state}>
-                      {state}
+                      {formatStateHSBBQ(state)}
                     </option>
                   ))}
                 </select>

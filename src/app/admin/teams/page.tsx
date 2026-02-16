@@ -14,6 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { formatStateHSBBQ } from "@/lib/format";
 
 interface Team {
   id: string;
@@ -273,7 +274,7 @@ export default function AdminTeamsPage() {
                       {team.state ? (
                         <div className="flex items-center gap-1.5 text-sm text-slate-500">
                           <MapPin className="w-4 h-4" />
-                          {team.state}
+                          {formatStateHSBBQ(team.state)}
                         </div>
                       ) : (
                         <span className="text-slate-400 text-sm">-</span>

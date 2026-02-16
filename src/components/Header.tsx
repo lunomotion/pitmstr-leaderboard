@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, User, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -13,18 +14,41 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-smoke-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
-          {/* Mobile menu button - left side */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-white"
-            aria-label="Toggle menu"
-          >
-            {mobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          {/* Logo + Mobile menu button - left side */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-white"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+
+            <Link href="/" className="flex items-center gap-2">
+              <div className="relative h-8 w-8 flex-shrink-0">
+                <Image
+                  src="/images/pitmstr-flame.png"
+                  alt="PITMSTR"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+              <div className="relative h-5 w-24 hidden sm:block">
+                <Image
+                  src="/images/pitmstr-wordmark.png"
+                  alt="PITMSTR"
+                  fill
+                  className="object-contain object-left"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
 
           {/* Desktop Navigation - centered */}
           <nav className="hidden md:flex items-center justify-center gap-8 flex-1">

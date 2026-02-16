@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ChevronRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import type { LeaderboardEntry } from "@/lib/types";
+import { formatStateHSBBQ } from "@/lib/format";
 import RankBadge from "./RankBadge";
 import DivisionBadge from "./DivisionBadge";
 
@@ -58,7 +59,7 @@ export default function LeaderboardRow({
           {entry.state && (
             <>
               <span className="text-neutral-grey">•</span>
-              <span>{entry.state}</span>
+              <span>{formatStateHSBBQ(entry.state)}</span>
             </>
           )}
         </div>

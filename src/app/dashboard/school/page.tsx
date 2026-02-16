@@ -11,6 +11,11 @@ import {
   Loader2,
   Check,
   LinkIcon,
+  Trophy,
+  FileText,
+  BookOpen,
+  Shield,
+  ChevronRight,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -235,58 +240,165 @@ export default function TeacherDashboard() {
         ) : (
           /* ── School linked: show real data ── */
           <>
+            {/* Charter Status Banner */}
+            <div className="bg-white rounded-xl border border-slate-100 p-5 mb-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-[#2E3A87]/10 rounded-xl flex items-center justify-center">
+                    <Shield className="w-6 h-6 text-[#2E3A87]" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-slate-900">
+                        {schoolData?.name || "—"}
+                      </p>
+                      <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-700 rounded-full">
+                        Active Charter
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-500">
+                      {schoolData?.city && schoolData?.state
+                        ? `${schoolData.city}, ${schoolData.state} HSBBQ`
+                        : "—"}
+                      {" · "}{teams.length} team{teams.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href={`/schools/${schoolId}`}
+                  className="text-sm text-[#2E3A87] hover:underline hidden sm:block"
+                >
+                  View Public Page
+                </Link>
+              </div>
+            </div>
+
             {/* Quick Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white rounded-xl border border-slate-100 p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-white rounded-xl border border-slate-100 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                     <School className="w-5 h-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-400">My School</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {schoolData?.name || "—"}
-                    </p>
+                    <p className="text-xs text-slate-400">School</p>
+                    <p className="text-lg font-bold text-slate-900">1</p>
+                    <p className="text-[11px] text-slate-400">Chartered</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="bg-white rounded-xl border border-slate-100 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
                     <Users className="w-5 h-5 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-400">Teams</p>
-                    <p className="text-lg font-semibold text-slate-900">
+                    <p className="text-xs text-slate-400">Teams</p>
+                    <p className="text-lg font-bold text-slate-900">
                       {teams.length}
                     </p>
+                    <p className="text-[11px] text-slate-400">Active</p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-100 p-6">
+              <div className="bg-white rounded-xl border border-slate-100 p-5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-slate-400">Location</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {schoolData?.city && schoolData?.state
-                        ? `${schoolData.city}, ${schoolData.state}`
-                        : "—"}
-                    </p>
+                    <p className="text-xs text-slate-400">Events</p>
+                    <p className="text-lg font-bold text-slate-900">—</p>
+                    <p className="text-[11px] text-slate-400">This season</p>
                   </div>
                 </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-slate-100 p-5">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-[#C62828]" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-400">Best Finish</p>
+                    <p className="text-lg font-bold text-slate-900">—</p>
+                    <p className="text-[11px] text-slate-400">All time</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-white rounded-xl border border-slate-100 p-5 mb-6">
+              <h3 className="font-semibold text-slate-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <Link
+                  href={`/schools/${schoolId}`}
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                >
+                  <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                    <Users className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">My Teams</p>
+                    <p className="text-xs text-slate-400">{teams.length} active</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/events"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                >
+                  <div className="w-10 h-10 bg-amber-50 rounded-lg flex items-center justify-center group-hover:bg-amber-100 transition-colors">
+                    <Calendar className="w-5 h-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Events</p>
+                    <p className="text-xs text-slate-400">Browse &amp; register</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/leaderboard"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                >
+                  <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                    <FileText className="w-5 h-5 text-[#C62828]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Scores</p>
+                    <p className="text-xs text-slate-400">View leaderboard</p>
+                  </div>
+                </Link>
+
+                <Link
+                  href="/knowledge-base"
+                  className="flex items-center gap-3 p-3 rounded-xl hover:bg-slate-50 transition-colors group"
+                >
+                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                    <BookOpen className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Resources</p>
+                    <p className="text-xs text-slate-400">Rules &amp; guides</p>
+                  </div>
+                </Link>
               </div>
             </div>
 
             {/* Teams List */}
             {teams.length > 0 ? (
               <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-100">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
                   <h3 className="font-semibold text-slate-900">Your Teams</h3>
+                  <Link
+                    href={`/schools/${schoolId}`}
+                    className="text-sm text-[#2E3A87] hover:underline flex items-center gap-1"
+                  >
+                    View all <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
                 <div className="divide-y divide-slate-50">
                   {teams.map((team) => (

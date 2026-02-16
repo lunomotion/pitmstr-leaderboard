@@ -17,6 +17,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { Team, TeamMember, School as SchoolType } from "@/lib/types";
+import { formatStateHSBBQ } from "@/lib/format";
 
 export default function TeamDetailPage() {
   const params = useParams();
@@ -122,7 +123,7 @@ export default function TeamDetailPage() {
             {team.state && (
               <span className="flex items-center gap-1 text-sm text-white/70">
                 <MapPin className="w-4 h-4" />
-                {team.state}
+                {formatStateHSBBQ(team.state)}
               </span>
             )}
           </div>

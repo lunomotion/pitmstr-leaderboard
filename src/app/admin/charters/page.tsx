@@ -11,6 +11,7 @@ import {
   Loader2,
   Filter,
 } from "lucide-react";
+import { formatStateHSBBQ } from "@/lib/format";
 
 interface SchoolItem {
   id: string;
@@ -98,7 +99,7 @@ export default function AdminChartersPage() {
               <option value="all">All States</option>
               {states.map((st) => (
                 <option key={st} value={st}>
-                  {st}
+                  {formatStateHSBBQ(st)}
                 </option>
               ))}
             </select>
@@ -183,7 +184,7 @@ export default function AdminChartersPage() {
                     <td className="px-6 py-4 hidden lg:table-cell">
                       {school.state ? (
                         <span className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-americana-blue/10 text-americana-blue">
-                          {school.state}
+                          {formatStateHSBBQ(school.state)}
                         </span>
                       ) : (
                         <span className="text-slate-400 text-sm">-</span>

@@ -8,6 +8,7 @@ import DivisionFilter from "@/components/DivisionFilter";
 import DivisionBadge from "@/components/DivisionBadge";
 import { Users, Loader2, Filter, ChevronRight, School, MapPin, Plus, X, Trash2 } from "lucide-react";
 import type { Team, Division } from "@/lib/types";
+import { formatStateHSBBQ } from "@/lib/format";
 
 export default function TeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
@@ -191,7 +192,7 @@ export default function TeamsPage() {
                   <option value="all">All States</option>
                   {availableStates.map((state) => (
                     <option key={state} value={state}>
-                      {state}
+                      {formatStateHSBBQ(state)}
                     </option>
                   ))}
                 </select>
@@ -225,7 +226,7 @@ export default function TeamsPage() {
                         className="text-xl font-bold text-smoke-black"
                         style={{ fontFamily: "var(--font-oswald)" }}
                       >
-                        {state} ({stateTeams.length})
+                        {formatStateHSBBQ(state)} ({stateTeams.length})
                       </h2>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
