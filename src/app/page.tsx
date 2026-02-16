@@ -179,8 +179,8 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1a1a1a]/40" />
 
         <div className="relative max-w-7xl mx-auto text-center">
-          {/* PITMSTR P Logo - Centered with black background */}
-          <div className="flex items-center justify-center mb-8">
+          {/* PITMSTR Logo + Wordmark */}
+          <div className="flex flex-col items-center mb-6">
             <Image
               src="/images/pitmstr-flame-nobg.png"
               alt="PITMSTR Logo"
@@ -189,6 +189,12 @@ export default function Home() {
               className="h-24 md:h-32 w-auto"
               priority
             />
+            <h1
+              className="text-4xl md:text-5xl font-bold italic text-white tracking-tight -mt-1"
+              style={{ fontFamily: "var(--font-oswald)" }}
+            >
+              PITMSTR
+            </h1>
           </div>
 
           {/* Tagline */}
@@ -387,13 +393,21 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col items-center gap-6">
             {/* Footer Logo */}
-            <Image
-              src="/images/pitmstr-flame-nobg.png"
-              alt="PITMSTR"
-              width={60}
-              height={75}
-              className="h-14 w-auto"
-            />
+            <div className="flex flex-col items-center">
+              <Image
+                src="/images/pitmstr-flame-nobg.png"
+                alt="PITMSTR"
+                width={60}
+                height={75}
+                className="h-14 w-auto"
+              />
+              <span
+                className="text-2xl font-bold italic text-white tracking-tight -mt-0.5"
+                style={{ fontFamily: "var(--font-oswald)" }}
+              >
+                PITMSTR
+              </span>
+            </div>
             <p
               className="text-sm text-white/80 text-center font-semibold tracking-wider"
               style={{ fontFamily: "var(--font-oswald)" }}

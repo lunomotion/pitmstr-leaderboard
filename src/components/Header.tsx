@@ -28,8 +28,8 @@ export default function Header() {
               )}
             </button>
 
-            <Link href="/" className="flex items-center gap-2">
-              <div className="relative h-8 w-8 flex-shrink-0">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="relative h-10 w-10 flex-shrink-0">
                 <Image
                   src="/images/pitmstr-flame.png"
                   alt="PITMSTR"
@@ -38,15 +38,12 @@ export default function Header() {
                   priority
                 />
               </div>
-              <div className="relative h-5 w-24 hidden sm:block">
-                <Image
-                  src="/images/pitmstr-wordmark.png"
-                  alt="PITMSTR"
-                  fill
-                  className="object-contain object-left"
-                  priority
-                />
-              </div>
+              <span
+                className="hidden sm:block text-xl font-bold italic text-white tracking-tight"
+                style={{ fontFamily: "var(--font-oswald)" }}
+              >
+                PITMSTR
+              </span>
             </Link>
           </div>
 
