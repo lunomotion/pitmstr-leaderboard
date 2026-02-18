@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { Menu, X, User, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -28,18 +27,9 @@ export default function Header() {
               )}
             </button>
 
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="relative h-10 w-10 flex-shrink-0">
-                <Image
-                  src="/images/pitmstr-flame.png"
-                  alt="PITMSTR"
-                  fill
-                  className="object-contain"
-                  priority
-                />
-              </div>
+            <Link href="/" className="flex items-center">
               <span
-                className="hidden sm:block text-xl font-bold italic text-white tracking-tight"
+                className="text-xl font-bold italic text-white tracking-tight"
                 style={{ fontFamily: "var(--font-oswald)" }}
               >
                 PITMSTR
