@@ -10,8 +10,8 @@
   /* Neutral Colors */
   --smoke-black: #1C1C1C;
   --smoke-black-light: #2D2D2D;
-  --brisket-brown: #6D4C41;
-  --brisket-brown-light: #8B6B5B;
+  --brisket-brown: #C62828;
+  --brisket-brown-light: #EF5350;
 
   /* Accent Colors */
   --americana-blue: #2E3A87;
@@ -21,7 +21,7 @@
   --clean-white: #FFFFFF;
   --neutral-grey: #CCCCCC;
   --light-grey: #F5F5F5;
-  --medium-grey: #9E9E9E;
+  --medium-grey: #616161;
 
   /* Semantic Colors */
   --success-green: #2E7D32;
@@ -232,6 +232,25 @@ body {
 
   .mobile-full {
     width: 100%;
+  }
+}
+
+/* Mobile landscape: prevent horizontal scroll, force vertical flow */
+@media (max-width: 1024px) and (orientation: landscape) {
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 1024px) {
+  html {
+    overflow-x: hidden;
+  }
+
+  body {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
