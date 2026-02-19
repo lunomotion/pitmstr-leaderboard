@@ -21,7 +21,7 @@
   --clean-white: #FFFFFF;
   --neutral-grey: #CCCCCC;
   --light-grey: #F5F5F5;
-  --medium-grey: #616161;
+  --medium-grey: #424242;
 
   /* Semantic Colors */
   --success-green: #2E7D32;
@@ -192,6 +192,11 @@ body {
 
 .filter-pill:hover:not(.active) {
   border-color: var(--smoke-black);
+}
+
+/* Sub-text boost: ensure secondary text is always readable */
+[class*="text-medium-grey"] {
+  font-weight: 500;
 }
 
 /* Score Display */
