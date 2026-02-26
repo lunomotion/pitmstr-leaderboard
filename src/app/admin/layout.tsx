@@ -15,6 +15,7 @@ import {
   HandHeart,
   Trophy,
   FileText,
+  Printer,
   AlertTriangle,
   Image as ImageIcon,
   Map,
@@ -41,6 +42,7 @@ const navItems = [
   { href: "/admin/judges", label: "Judges", icon: ClipboardList },
   { href: "/admin/volunteers", label: "Volunteers", icon: HandHeart },
   { href: "/admin/sponsors", label: "Sponsors", icon: Award },
+  { href: "/admin/reports", label: "Reports & PDFs", icon: Printer },
 ];
 
 const dataItems = [
