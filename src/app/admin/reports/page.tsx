@@ -122,16 +122,11 @@ export default function AdminReportsPage() {
         });
         url = `/api/reports/qr-sheet?${params}`;
       } else {
-        // qr-bulk: generate for all teams (open each in new tab)
-        for (const team of teams) {
-          const params = new URLSearchParams({
-            eventId: selectedEvent,
-            teamId: team.id,
-          });
-          window.open(`/api/reports/qr-sheet?${params}`, "_blank");
-        }
-        setLoading(false);
-        return;
+        // qr-bulk: single multi-page PDF with all teams
+        const params = new URLSearchParams({
+          eventId: selectedEvent,
+        });
+        url = `/api/reports/qr-sheet-batch?${params}`;
       }
 
       // Open PDF in new tab for preview/download
@@ -328,11 +323,11 @@ export default function AdminReportsPage() {
 
           {/* Bulk info */}
           {reportType === "qr-bulk" && selectedEvent && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <p className="text-sm text-amber-800">
-                <strong>Bulk generation</strong> will open a new tab for each
-                team&apos;s QR sheet ({teams.length} teams). Make sure your
-                browser allows pop-ups for this site.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-800">
+                <strong>Bulk generation</strong> creates a single multi-page PDF
+                with all {teams.length} teams — one page per team. Print once,
+                cut, and distribute.
               </p>
             </div>
           )}

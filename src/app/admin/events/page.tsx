@@ -13,6 +13,7 @@ import {
   Filter,
   Trash2,
   X,
+  FileText,
 } from "lucide-react";
 
 interface Event {
@@ -297,6 +298,13 @@ export default function AdminEventsPage() {
                     <td className="px-6 py-4">{getStatusBadge(event.status)}</td>
                     <td className="px-6 py-4">
                       <div className="flex items-center justify-end gap-1">
+                        <Link
+                          href={`/admin/events/${event.id}/documents`}
+                          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                          title="Event documents"
+                        >
+                          <FileText className="w-4 h-4" />
+                        </Link>
                         <Link
                           href={`/leaderboard/${event.id}`}
                           target="_blank"
