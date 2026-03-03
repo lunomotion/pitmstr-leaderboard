@@ -55,13 +55,31 @@ export async function POST(request: NextRequest) {
     const base = getBase();
     const checkedInAt = new Date().toISOString();
 
-    await base("Turn-Ins").create({
+    const checkinFields: Partial<Airtable.FieldSet> = {
       Event: [eventId],
       Team: [teamId],
-      "Judge ID": "SYSTEM-CHECKIN",
-      Notes: `Team check-in at ${checkedInAt}`,
+      Notes: `SYSTEM-CHECKIN | Team check-in at ${checkedInAt}`,
       "Submitted At": checkedInAt,
-    });
+    };
+
+    try {
+      await base("Turn-Ins").create(checkinFields);
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "error" in err &&
+        (err as { error: string }).error === "UNKNOWN_FIELD_NAME"
+      ) {
+        // Minimal fallback — just link fields
+        await base("Turn-Ins").create({
+          Event: [eventId],
+          Team: [teamId],
+        });
+      } else {
+        throw err;
+      }
+    }
 
     return NextResponse.json({
       success: true,

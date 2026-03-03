@@ -98,7 +98,6 @@ export async function POST(request: NextRequest) {
     const fields: Partial<Airtable.FieldSet> = {
       Event: [body.eventId],
       Team: [body.teamId],
-      "Judge ID": body.judgeId,
       MEAT_M: body.scores.M,
       MEAT_E: body.scores.E,
       MEAT_A: body.scores.A,
@@ -115,11 +114,43 @@ export async function POST(request: NextRequest) {
       fields["Category Name"] = body.category;
     }
 
-    if (body.notes) {
-      fields["Notes"] = body.notes;
+    // Store judge ID and notes together
+    const noteParts: string[] = [];
+    if (body.judgeId) noteParts.push(`Judge: ${body.judgeId}`);
+    if (body.notes) noteParts.push(body.notes);
+    if (noteParts.length > 0) {
+      fields["Notes"] = noteParts.join(" | ");
     }
 
-    const record = await base("Turn-Ins").create(fields);
+    // Try with all fields first, fall back if some don't exist in Airtable
+    let record;
+    try {
+      record = await base("Turn-Ins").create(fields);
+    } catch (err: unknown) {
+      if (
+        err &&
+        typeof err === "object" &&
+        "error" in err &&
+        (err as { error: string }).error === "UNKNOWN_FIELD_NAME"
+      ) {
+        // Retry with only core fields (links + MEAT scores)
+        console.warn("Retrying Turn-In create with minimal fields:", (err as unknown as { message: string }).message);
+        const minimalFields: Partial<Airtable.FieldSet> = {
+          Event: [body.eventId],
+          Team: [body.teamId],
+          MEAT_M: body.scores.M,
+          MEAT_E: body.scores.E,
+          MEAT_A: body.scores.A,
+          MEAT_T: body.scores.T,
+        };
+        if (categoryRecords.length > 0) {
+          minimalFields["Category"] = [categoryRecords[0].id];
+        }
+        record = await base("Turn-Ins").create(minimalFields);
+      } else {
+        throw err;
+      }
+    }
 
     return NextResponse.json({
       success: true,

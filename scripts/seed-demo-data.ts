@@ -377,11 +377,10 @@ async function seedTurnIns(
           const T = randomScore(65, 98);
           const weighted = 0.1 * M + 0.5 * E + 0.2 * A + 0.2 * T;
 
-          await base("Turn-Ins").create({
+          const turnInFields: Partial<Airtable.FieldSet> = {
             Event: [eventId],
             Team: [teamId],
             Category: [catId],
-            "Judge ID": `DEMO-Judge-${judge}`,
             MEAT_M: M,
             MEAT_E: E,
             MEAT_A: A,
@@ -390,7 +389,35 @@ async function seedTurnIns(
             "Submitted At": new Date(
               new Date(event.date).getTime() + judge * 3600000
             ).toISOString(),
-          });
+            Notes: `DEMO-Judge-${judge}`,
+          };
+
+          try {
+            await base("Turn-Ins").create(turnInFields);
+          } catch (fieldErr: unknown) {
+            // If a field doesn't exist in Airtable, retry with only link + MEAT fields
+            if (
+              fieldErr &&
+              typeof fieldErr === "object" &&
+              "error" in fieldErr &&
+              (fieldErr as { error: string }).error === "UNKNOWN_FIELD_NAME"
+            ) {
+              console.warn(
+                `    Field error: ${(fieldErr as unknown as { message: string }).message} — retrying with minimal fields`
+              );
+              await base("Turn-Ins").create({
+                Event: [eventId],
+                Team: [teamId],
+                Category: [catId],
+                MEAT_M: M,
+                MEAT_E: E,
+                MEAT_A: A,
+                MEAT_T: T,
+              });
+            } else {
+              throw fieldErr;
+            }
+          }
         }
       }
 
@@ -409,7 +436,69 @@ function randomScore(min: number, max: number): number {
 // Main
 // ---------------------------------------------------------------------------
 
+/**
+ * Lookup existing DEMO records from Airtable by name prefix.
+ * Used for --turn-ins-only mode to avoid re-creating base data.
+ */
+async function lookupExistingDemoRecords(): Promise<{
+  teamMap: RecordMap;
+  eventMap: RecordMap;
+  categoryMap: RecordMap;
+}> {
+  console.log("Looking up existing DEMO records in Airtable...");
+
+  const [teams, events, categories] = await Promise.all([
+    base("Teams").select({ fields: ["Team Name"] }).all(),
+    base("Events").select({ fields: ["Event Name"] }).all(),
+    base("Categories").select({ fields: ["Category Name"] }).all(),
+  ]);
+
+  // Match teams by name
+  const teamMap: RecordMap = new Map();
+  for (let i = 0; i < DEMO_TEAMS.length; i++) {
+    const match = teams.find(
+      (r) => (r.get("Team Name") as string) === DEMO_TEAMS[i].name
+    );
+    if (match) teamMap.set(i, match.id);
+  }
+
+  // Match events by name
+  const eventMap: RecordMap = new Map();
+  for (let i = 0; i < DEMO_EVENTS.length; i++) {
+    const match = events.find(
+      (r) => (r.get("Event Name") as string) === DEMO_EVENTS[i].name
+    );
+    if (match) eventMap.set(i, match.id);
+  }
+
+  // Match categories by name
+  const categoryMap: RecordMap = new Map();
+  for (let i = 0; i < DEMO_CATEGORIES.length; i++) {
+    const match = categories.find(
+      (r) => (r.get("Category Name") as string) === DEMO_CATEGORIES[i].name
+    );
+    if (match) categoryMap.set(i, match.id);
+  }
+
+  console.log(
+    `  Found: ${teamMap.size} teams, ${eventMap.size} events, ${categoryMap.size} categories`
+  );
+
+  return { teamMap, eventMap, categoryMap };
+}
+
 async function main() {
+  const turnInsOnly = process.argv.includes("--turn-ins-only");
+
+  if (turnInsOnly) {
+    console.log("\n=== PITMSTR Turn-Ins Only Seeder ===\n");
+    const { teamMap, eventMap, categoryMap } =
+      await lookupExistingDemoRecords();
+    await seedTurnIns(eventMap, teamMap, categoryMap);
+    console.log("\n=== Turn-Ins Seeding Complete ===\n");
+    return;
+  }
+
   console.log("\n=== PITMSTR Demo Data Seeder ===\n");
 
   const stateMap = await seedStates();

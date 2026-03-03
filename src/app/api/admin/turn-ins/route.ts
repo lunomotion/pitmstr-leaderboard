@@ -14,12 +14,20 @@ export async function GET() {
   try {
     const base = getBase();
 
-    const records = await base("Turn-Ins")
-      .select({
-        sort: [{ field: "Submitted At", direction: "desc" }],
-        maxRecords: 200,
-      })
-      .all();
+    let records;
+    try {
+      records = await base("Turn-Ins")
+        .select({
+          sort: [{ field: "Submitted At", direction: "desc" }],
+          maxRecords: 200,
+        })
+        .all();
+    } catch {
+      // Fallback if "Submitted At" field doesn't exist
+      records = await base("Turn-Ins")
+        .select({ maxRecords: 200 })
+        .all();
+    }
 
     // Build lookup caches for teams, events, categories
     const teamIds = new Set<string>();
@@ -55,7 +63,7 @@ export async function GET() {
           (cid ? categoryNames.get(cid) : null) ||
           (r.get("Category Name") as string) ||
           "Unknown",
-        judgeId: (r.get("Judge ID") as string) || "—",
+        judgeId: (r.get("Judge ID") as string) || extractJudgeFromNotes(r.get("Notes") as string) || "—",
         scores: {
           M: (r.get("MEAT_M") as number) || 0,
           E: (r.get("MEAT_E") as number) || 0,
@@ -76,6 +84,12 @@ export async function GET() {
       { status: 500 }
     );
   }
+}
+
+function extractJudgeFromNotes(notes: string | undefined | null): string | null {
+  if (!notes) return null;
+  const match = notes.match(/^(?:Judge:\s*)?(.+?)(?:\s*\||$)/);
+  return match ? match[1].trim() : null;
 }
 
 function getFirstLinked(field: unknown): string | null {
