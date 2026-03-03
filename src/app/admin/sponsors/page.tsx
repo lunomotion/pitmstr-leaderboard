@@ -1,10 +1,46 @@
 "use client";
 
-import { Award, Plus, Search } from "lucide-react";
-import { useState } from "react";
+import { Award, Search, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+
+interface SponsorRecord {
+  id: string;
+  [key: string]: unknown;
+}
 
 export default function SponsorsPage() {
   const [search, setSearch] = useState("");
+  const [records, setRecords] = useState<SponsorRecord[]>([]);
+  const [fields, setFields] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/entities?table=Sponsors")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          setRecords(json.data);
+          setFields(json.fields);
+        } else {
+          setError(json.error || "Failed to load sponsors");
+        }
+      })
+      .catch(() => setError("Failed to load sponsors"))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = records.filter((r) => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return Object.values(r).some(
+      (v) => typeof v === "string" && v.toLowerCase().includes(q)
+    );
+  });
+
+  const displayFields = fields.filter(
+    (f) => !f.startsWith("_") && f !== "id"
+  );
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -12,13 +48,11 @@ export default function SponsorsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Sponsors</h1>
           <p className="text-slate-500 mt-1">
-            Manage event and organizational sponsors
+            {loading
+              ? "Loading..."
+              : `${records.length} sponsor${records.length !== 1 ? "s" : ""} on file`}
           </p>
         </div>
-        <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-americana-blue text-white rounded-xl font-medium text-sm hover:bg-americana-blue/90 transition-colors shadow-lg shadow-americana-blue/25">
-          <Plus className="w-4 h-4" />
-          Add Sponsor
-        </button>
       </div>
 
       <div className="relative">
@@ -33,14 +67,65 @@ export default function SponsorsPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-        <div className="flex flex-col items-center justify-center py-16">
-          <Award className="w-12 h-12 text-slate-300 mb-3" />
-          <p className="text-slate-600 font-medium">No sponsors yet</p>
-          <p className="text-sm text-slate-400 mt-1">
-            Sponsor partnerships will be tracked here
-          </p>
-        </div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 text-slate-400 animate-spin mb-3" />
+            <p className="text-slate-500 text-sm">Loading sponsors...</p>
+          </div>
+        ) : error ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Award className="w-12 h-12 text-red-300 mb-3" />
+            <p className="text-red-600 font-medium">Error loading sponsors</p>
+            <p className="text-sm text-slate-400 mt-1">{error}</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16">
+            <Award className="w-12 h-12 text-slate-300 mb-3" />
+            <p className="text-slate-600 font-medium">
+              {search ? "No matching sponsors" : "No sponsors yet"}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-100 bg-slate-50/50">
+                  {displayFields.map((f) => (
+                    <th
+                      key={f}
+                      className="text-left px-4 py-3 font-semibold text-slate-600"
+                    >
+                      {f}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((r) => (
+                  <tr
+                    key={r.id}
+                    className="border-b border-slate-50 hover:bg-slate-50/50"
+                  >
+                    {displayFields.map((f) => (
+                      <td key={f} className="px-4 py-3 text-slate-700">
+                        {formatCell(r[f])}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+function formatCell(value: unknown): string {
+  if (value === null || value === undefined) return "—";
+  if (Array.isArray(value)) return value.join(", ");
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
 }
