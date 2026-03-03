@@ -5,16 +5,6 @@
  * Called from the QR code judge scoring form (/scan/turnin/...).
  *
  * Writes to the "Turn-Ins" table in Airtable.
- *
- * Request body:
- * {
- *   eventId: string,
- *   teamId: string,
- *   category: string,
- *   judgeId: string,
- *   scores: { M: number, E: number, A: number, T: number },
- *   notes?: string
- * }
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -50,7 +40,11 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.eventId || !body.teamId || !body.category || !body.judgeId) {
       return NextResponse.json(
-        { success: false, error: "eventId, teamId, category, and judgeId are required" },
+        {
+          success: false,
+          error:
+            "eventId, teamId, category, and judgeId are required",
+        },
         { status: 400 }
       );
     }
@@ -65,7 +59,12 @@ export async function POST(request: NextRequest) {
     // Validate score ranges
     for (const component of ["M", "E", "A", "T"] as const) {
       const value = body.scores[component];
-      if (typeof value !== "number" || isNaN(value) || value < 0 || value > 100) {
+      if (
+        typeof value !== "number" ||
+        isNaN(value) ||
+        value < 0 ||
+        value > 100
+      ) {
         return NextResponse.json(
           {
             success: false,
@@ -79,77 +78,124 @@ export async function POST(request: NextRequest) {
     const base = getBase();
 
     // Look up the Category record ID from name
-    const categoryRecords = await base("Categories")
-      .select({
-        filterByFormula: `LOWER({Category Name}) = LOWER('${body.category.replace(/'/g, "\\'")}')`,
-        maxRecords: 1,
-      })
-      .all();
+    let categoryRecordId: string | null = null;
+    try {
+      const categoryRecords = await base("Categories")
+        .select({
+          filterByFormula: `LOWER({Category Name}) = LOWER('${body.category.replace(/'/g, "\\'")}')`,
+          maxRecords: 1,
+        })
+        .all();
+      if (categoryRecords.length > 0) {
+        categoryRecordId = categoryRecords[0].id;
+      }
+    } catch (catErr) {
+      console.warn("Category lookup failed:", catErr);
+    }
 
-    // Build the Turn-In record
-    // Calculate weighted score for convenience
+    // Calculate weighted score
     const weightedScore =
-      0.10 * body.scores.M +
-      0.50 * body.scores.E +
-      0.20 * body.scores.A +
-      0.20 * body.scores.T;
+      0.1 * body.scores.M +
+      0.5 * body.scores.E +
+      0.2 * body.scores.A +
+      0.2 * body.scores.T;
     const roundedScore = Math.round(weightedScore * 1000) / 1000;
 
-    const fields: Partial<Airtable.FieldSet> = {
-      Event: [body.eventId],
-      Team: [body.teamId],
-      MEAT_M: body.scores.M,
-      MEAT_E: body.scores.E,
-      MEAT_A: body.scores.A,
-      MEAT_T: body.scores.T,
-      "Submitted At": new Date().toISOString(),
-      "Weighted Score": roundedScore,
-    };
-
-    // Link category if we found it
-    if (categoryRecords.length > 0) {
-      fields["Category"] = [categoryRecords[0].id];
-    } else {
-      // Store as text fallback
-      fields["Category Name"] = body.category;
-    }
-
-    // Store judge ID and notes together
+    // Build notes string with judge info
     const noteParts: string[] = [];
     if (body.judgeId) noteParts.push(`Judge: ${body.judgeId}`);
+    noteParts.push(`Category: ${body.category}`);
+    noteParts.push(`Scores: M=${body.scores.M} E=${body.scores.E} A=${body.scores.A} T=${body.scores.T}`);
+    noteParts.push(`Weighted: ${roundedScore}`);
     if (body.notes) noteParts.push(body.notes);
-    if (noteParts.length > 0) {
-      fields["Notes"] = noteParts.join(" | ");
-    }
+    const notesString = noteParts.join(" | ");
 
-    // Try with all fields first, fall back if some don't exist in Airtable
+    // Try progressively simpler field sets until one works
+    const fieldSets: Partial<Airtable.FieldSet>[] = [
+      // Attempt 1: All fields
+      {
+        Event: [body.eventId],
+        Team: [body.teamId],
+        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
+        MEAT_M: body.scores.M,
+        MEAT_E: body.scores.E,
+        MEAT_A: body.scores.A,
+        MEAT_T: body.scores.T,
+        "Weighted Score": roundedScore,
+        "Submitted At": new Date().toISOString(),
+        Notes: notesString,
+      },
+      // Attempt 2: Links + MEAT scores only
+      {
+        Event: [body.eventId],
+        Team: [body.teamId],
+        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
+        MEAT_M: body.scores.M,
+        MEAT_E: body.scores.E,
+        MEAT_A: body.scores.A,
+        MEAT_T: body.scores.T,
+      },
+      // Attempt 3: Links + Notes only (scores in notes as backup)
+      {
+        Event: [body.eventId],
+        Team: [body.teamId],
+        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
+        Notes: notesString,
+      },
+      // Attempt 4: Just link fields
+      {
+        Event: [body.eventId],
+        Team: [body.teamId],
+        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
+      },
+      // Attempt 5: Bare minimum — just event + team
+      {
+        Event: [body.eventId],
+        Team: [body.teamId],
+      },
+    ];
+
     let record;
-    try {
-      record = await base("Turn-Ins").create(fields);
-    } catch (err: unknown) {
-      if (
-        err &&
-        typeof err === "object" &&
-        "error" in err &&
-        (err as { error: string }).error === "UNKNOWN_FIELD_NAME"
-      ) {
-        // Retry with only core fields (links + MEAT scores)
-        console.warn("Retrying Turn-In create with minimal fields:", (err as unknown as { message: string }).message);
-        const minimalFields: Partial<Airtable.FieldSet> = {
-          Event: [body.eventId],
-          Team: [body.teamId],
-          MEAT_M: body.scores.M,
-          MEAT_E: body.scores.E,
-          MEAT_A: body.scores.A,
-          MEAT_T: body.scores.T,
-        };
-        if (categoryRecords.length > 0) {
-          minimalFields["Category"] = [categoryRecords[0].id];
+    let lastError: unknown = null;
+
+    for (let i = 0; i < fieldSets.length; i++) {
+      try {
+        record = await base("Turn-Ins").create(fieldSets[i]);
+        if (i > 0) {
+          console.warn(
+            `Turn-In created with field set attempt ${i + 1} (simpler fields)`
+          );
         }
-        record = await base("Turn-Ins").create(minimalFields);
-      } else {
+        break;
+      } catch (err: unknown) {
+        lastError = err;
+        const isFieldError =
+          err &&
+          typeof err === "object" &&
+          "error" in err &&
+          (err as { error: string }).error === "UNKNOWN_FIELD_NAME";
+
+        if (isFieldError && i < fieldSets.length - 1) {
+          console.warn(
+            `Turn-In attempt ${i + 1} failed:`,
+            (err as unknown as { message?: string }).message || "unknown field"
+          );
+          continue;
+        }
+        // Not a field error or last attempt — throw
         throw err;
       }
+    }
+
+    if (!record) {
+      const errMsg =
+        lastError && typeof lastError === "object" && "message" in lastError
+          ? (lastError as { message: string }).message
+          : "All field combinations failed";
+      return NextResponse.json(
+        { success: false, error: errMsg },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({
@@ -162,8 +208,15 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Score submission error:", error);
+    // Return the actual error message so we can debug
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === "object" && error && "message" in error
+          ? (error as { message: string }).message
+          : "Failed to submit score";
     return NextResponse.json(
-      { success: false, error: "Failed to submit score" },
+      { success: false, error: message },
       { status: 500 }
     );
   }
