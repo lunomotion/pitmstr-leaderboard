@@ -1,42 +1,35 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Trophy,
-  Search,
-  Loader2,
-  RefreshCw,
-  ChevronDown,
-} from "lucide-react";
+import { Trophy, Search, Loader2, RefreshCw } from "lucide-react";
 
-interface TurnIn {
+interface ReportCard {
   id: string;
+  name: string;
   teamName: string;
   eventName: string;
   category: string;
-  judgeId: string;
+  judgeName: string;
   scores: { M: number; E: number; A: number; T: number };
-  weightedScore: number;
-  submittedAt: string;
-  notes?: string;
+  totalScore: number;
 }
 
 export default function TurnInsPage() {
-  const [turnIns, setTurnIns] = useState<TurnIn[]>([]);
+  const [cards, setCards] = useState<ReportCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  async function fetchTurnIns() {
+  async function fetchCards() {
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/admin/turn-ins");
       const json = await res.json();
       if (json.success) {
-        setTurnIns(json.data || []);
+        setCards(json.data || []);
       } else {
-        setError(json.error || "Failed to load turn-ins");
+        setError(json.error || "Failed to load scorecards");
       }
     } catch {
       setError("Failed to connect to server");
@@ -46,29 +39,33 @@ export default function TurnInsPage() {
   }
 
   useEffect(() => {
-    fetchTurnIns();
+    fetchCards();
   }, []);
 
-  const filtered = turnIns.filter(
-    (t) =>
+  const filtered = cards.filter(
+    (c) =>
       !search ||
-      t.teamName?.toLowerCase().includes(search.toLowerCase()) ||
-      t.eventName?.toLowerCase().includes(search.toLowerCase()) ||
-      t.category?.toLowerCase().includes(search.toLowerCase()) ||
-      t.judgeId?.toLowerCase().includes(search.toLowerCase())
+      c.teamName?.toLowerCase().includes(search.toLowerCase()) ||
+      c.eventName?.toLowerCase().includes(search.toLowerCase()) ||
+      c.category?.toLowerCase().includes(search.toLowerCase()) ||
+      c.judgeName?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Turn-Ins</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            BBQ Report Cards
+          </h1>
           <p className="text-slate-500 mt-1">
-            Judge score submissions from QR code scanning
+            {loading
+              ? "Loading..."
+              : `${cards.length} scorecard${cards.length !== 1 ? "s" : ""} from judge submissions`}
           </p>
         </div>
         <button
-          onClick={fetchTurnIns}
+          onClick={fetchCards}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
@@ -76,7 +73,6 @@ export default function TurnInsPage() {
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
         <input
@@ -88,7 +84,6 @@ export default function TurnInsPage() {
         />
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-16">
@@ -98,7 +93,7 @@ export default function TurnInsPage() {
           <div className="text-center py-16">
             <p className="text-red-500 text-sm">{error}</p>
             <button
-              onClick={fetchTurnIns}
+              onClick={fetchCards}
               className="mt-3 text-sm text-americana-blue hover:underline"
             >
               Retry
@@ -107,7 +102,7 @@ export default function TurnInsPage() {
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Trophy className="w-12 h-12 text-slate-300 mb-3" />
-            <p className="text-slate-600 font-medium">No turn-ins yet</p>
+            <p className="text-slate-600 font-medium">No scorecards yet</p>
             <p className="text-sm text-slate-400 mt-1">
               Scores will appear here when judges submit via QR code
             </p>
@@ -130,61 +125,55 @@ export default function TurnInsPage() {
                     Judge
                   </th>
                   <th className="text-center px-3 py-3 font-medium text-slate-500">
-                    M
+                    <span title="Mis En Place (out of 10)">M</span>
                   </th>
                   <th className="text-center px-3 py-3 font-medium text-slate-500">
-                    E
+                    <span title="Taste (out of 55)">E</span>
                   </th>
                   <th className="text-center px-3 py-3 font-medium text-slate-500">
-                    A
+                    <span title="Appearance (out of 15)">A</span>
                   </th>
                   <th className="text-center px-3 py-3 font-medium text-slate-500">
-                    T
+                    <span title="Texture (out of 20)">T</span>
                   </th>
                   <th className="text-center px-4 py-3 font-medium text-slate-500">
-                    Weighted
-                  </th>
-                  <th className="text-left px-4 py-3 font-medium text-slate-500">
-                    Submitted
+                    Total
                   </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {filtered.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+                {filtered.map((c) => (
+                  <tr
+                    key={c.id}
+                    className="hover:bg-slate-50 transition-colors"
+                  >
                     <td className="px-4 py-3 font-medium text-slate-900">
-                      {t.teamName || "—"}
+                      {c.teamName}
                     </td>
-                    <td className="px-4 py-3 text-slate-600">
-                      {t.eventName || "—"}
-                    </td>
+                    <td className="px-4 py-3 text-slate-600">{c.eventName}</td>
                     <td className="px-4 py-3">
                       <span className="inline-flex px-2 py-0.5 bg-amber-50 text-amber-700 rounded-md text-xs font-medium">
-                        {t.category}
+                        {c.category}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-slate-600">{t.judgeId}</td>
+                    <td className="px-4 py-3 text-slate-600">{c.judgeName}</td>
                     <td className="text-center px-3 py-3 font-mono text-slate-700">
-                      {t.scores.M}
+                      {c.scores.M}
                     </td>
                     <td className="text-center px-3 py-3 font-mono text-slate-700">
-                      {t.scores.E}
+                      {c.scores.E}
                     </td>
                     <td className="text-center px-3 py-3 font-mono text-slate-700">
-                      {t.scores.A}
+                      {c.scores.A}
                     </td>
                     <td className="text-center px-3 py-3 font-mono text-slate-700">
-                      {t.scores.T}
+                      {c.scores.T}
                     </td>
                     <td className="text-center px-4 py-3">
                       <span className="font-semibold text-americana-blue">
-                        {t.weightedScore.toFixed(1)}
+                        {c.totalScore}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-slate-400">
-                      {t.submittedAt
-                        ? new Date(t.submittedAt).toLocaleString()
-                        : "—"}
+                      <span className="text-slate-400 text-xs"> /100</span>
                     </td>
                   </tr>
                 ))}
@@ -195,8 +184,8 @@ export default function TurnInsPage() {
       </div>
 
       <p className="text-xs text-slate-400 text-center">
-        M.E.A.T. Scoring: Mise en Place (10%) · Execution (50%) · Appearance
-        (20%) · Texture (20%)
+        M.E.A.T. Scoring: Mis En Place (10 pts) · Taste (55 pts) · Appearance
+        (15 pts) · Texture (20 pts) · Total: 100
       </p>
     </div>
   );
