@@ -137,13 +137,7 @@ export async function POST(request: NextRequest) {
       fields["Judge"] = [judgeRecordId];
     }
 
-    // Build notes
-    const noteParts: string[] = [];
-    if (!judgeRecordId) noteParts.push(`Judge: ${body.judgeId}`);
-    if (body.notes) noteParts.push(body.notes);
-    if (noteParts.length > 0) {
-      fields["Notes"] = noteParts.join(" | ");
-    }
+    // Note: BBQ Report Cards table has no "Notes" field
 
     const record = await base("BBQ Report Cards").create(fields);
 
