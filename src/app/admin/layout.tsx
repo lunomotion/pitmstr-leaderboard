@@ -47,7 +47,7 @@ const navItems = [
 
 const dataItems = [
   { href: "/admin/turn-ins", label: "Turn-Ins", icon: Trophy },
-  { href: "/admin/report-cards", label: "Report Cards", icon: FileText },
+  { href: "/admin/report-cards", label: "Scorecards", icon: FileText },
   { href: "/admin/penalties", label: "Penalties", icon: AlertTriangle },
   { href: "/admin/media", label: "Media", icon: ImageIcon },
 ];

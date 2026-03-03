@@ -1,8 +1,11 @@
 /**
  * GET /api/admin/turn-ins
  *
- * Fetches BBQ Report Cards (judge scorecards) from Airtable.
- * Used by the admin Turn-Ins page to display scoring data.
+ * Fetches Turn-Ins from Airtable — these represent physical box
+ * submissions (team turning in food at an event).
+ *
+ * Airtable fields: Name, Team, Event, Category, Turn-In Time,
+ * Box Photo, Notes, Report Cards, Scorecard Count
  */
 
 import { NextResponse } from "next/server";
@@ -21,40 +24,33 @@ export async function GET() {
   try {
     const base = getBase();
 
-    const records = await base("BBQ Report Cards")
+    const records = await base("Turn-Ins")
       .select({ maxRecords: 200 })
       .all();
 
     const data = records.map((r) => {
-      const M = (r.get("Mis En Place (out of 10)") as number) || 0;
-      const E = (r.get("Taste (out of 55)") as number) || 0;
-      const A = (r.get("Appearance (out of 15)") as number) || 0;
-      const T = (r.get("Texture (out of 20)") as number) || 0;
-      const totalScore = (r.get("Total Score") as number) || M + E + A + T;
-
-      // Lookup fields return arrays
-      const teamName = getFirstLookup(r.get("Team Name (Lookup)"));
-      const eventName = getFirstLookup(r.get("Event Name (Lookup)"));
-      const categoryName = getFirstLookup(r.get("Category Name (Lookup)"));
-      const judgeName = getFirstLookup(r.get("Judge Name (Lookup)"));
+      const teamName = getFirstLookup(r.get("Team Name"));
+      const eventName = getFirstLookup(r.get("Event Name"));
+      const categoryDesc = getFirstLookup(r.get("Category Description"));
 
       return {
         id: r.id,
         name: (r.get("Name") as string) || "",
         teamName: teamName || "Unknown",
         eventName: eventName || "Unknown",
-        category: categoryName || "Unknown",
-        judgeName: judgeName || "—",
-        scores: { M, E, A, T },
-        totalScore,
+        category: categoryDesc || "Unknown",
+        turnInTime: (r.get("Turn-In Time") as string) || null,
+        scorecardCount: (r.get("Scorecard Count") as number) || 0,
+        notes: (r.get("Notes") as string) || "",
+        hasPhoto: Array.isArray(r.get("Box Photo")) && (r.get("Box Photo") as unknown[]).length > 0,
       };
     });
 
     return NextResponse.json({ success: true, data });
   } catch (error) {
-    console.error("Error fetching report cards:", error);
+    console.error("Error fetching turn-ins:", error);
     const message =
-      error instanceof Error ? error.message : "Failed to fetch report cards";
+      error instanceof Error ? error.message : "Failed to fetch turn-ins";
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 }
@@ -63,9 +59,7 @@ export async function GET() {
 }
 
 function getFirstLookup(field: unknown): string | null {
-  if (Array.isArray(field) && field.length > 0) {
-    return String(field[0]);
-  }
+  if (Array.isArray(field) && field.length > 0) return String(field[0]);
   if (typeof field === "string") return field;
   return null;
 }
