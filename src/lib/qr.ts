@@ -19,7 +19,7 @@ import QRCode from "qrcode";
 const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
   process.env.NEXT_PUBLIC_BASE_URL ||
-  "https://highschoolbbqleague.com";
+  "https://pitmstr.vercel.app";
 
 // ---------------------------------------------------------------------------
 // Types
