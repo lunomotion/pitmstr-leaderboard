@@ -23,7 +23,6 @@
     "svix": "^1.84.1"
   },
   "devDependencies": {
-    "@esbuild/darwin-x64": "^0.27.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.6",
