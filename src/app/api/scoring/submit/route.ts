@@ -4,7 +4,19 @@
  * Saves a single judge's MEAT scores for a team's food category.
  * Called from the QR code judge scoring form (/scan/turnin/...).
  *
- * Writes to the "Turn-Ins" table in Airtable.
+ * Writes to the "BBQ Report Cards" table in Airtable.
+ *
+ * Airtable field names (from Mike's base):
+ *   - "Mis En Place (out of 10)"  → 0-10 points
+ *   - "Taste (out of 55)"         → 0-55 points
+ *   - "Appearance (out of 15)"    → 0-15 points
+ *   - "Texture (out of 20)"       → 0-20 points
+ *   - "Total Score"               → sum (out of 100)
+ *   - "Judge"                     → link to Judges table
+ *   - "Team"                      → link to Teams table
+ *   - "Event"                     → link to Events table
+ *   - "Category"                  → link to Categories table
+ *   - "Notes"                     → text
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -25,10 +37,10 @@ interface SubmitScoreRequest {
   category: string;
   judgeId: string;
   scores: {
-    M: number;
-    E: number;
-    A: number;
-    T: number;
+    M: number; // Mis En Place: 0-10
+    E: number; // Taste (EAT): 0-55
+    A: number; // Appearance: 0-15
+    T: number; // Texture: 0-20
   };
   notes?: string;
 }
@@ -40,11 +52,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!body.eventId || !body.teamId || !body.category || !body.judgeId) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "eventId, teamId, category, and judgeId are required",
-        },
+        { success: false, error: "eventId, teamId, category, and judgeId are required" },
         { status: 400 }
       );
     }
@@ -56,20 +64,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate score ranges
-    for (const component of ["M", "E", "A", "T"] as const) {
-      const value = body.scores[component];
-      if (
-        typeof value !== "number" ||
-        isNaN(value) ||
-        value < 0 ||
-        value > 100
-      ) {
+    // Validate score ranges per MEAT system
+    const ranges: Record<string, { max: number; label: string }> = {
+      M: { max: 10, label: "Mis En Place" },
+      E: { max: 55, label: "Taste" },
+      A: { max: 15, label: "Appearance" },
+      T: { max: 20, label: "Texture" },
+    };
+
+    for (const [key, { max, label }] of Object.entries(ranges)) {
+      const value = body.scores[key as keyof typeof body.scores];
+      if (typeof value !== "number" || isNaN(value) || value < 0 || value > max) {
         return NextResponse.json(
-          {
-            success: false,
-            error: `${component} score must be a number between 0 and 100 (got ${value})`,
-          },
+          { success: false, error: `${label} must be 0–${max} (got ${value})` },
           { status: 400 }
         );
       }
@@ -77,138 +84,80 @@ export async function POST(request: NextRequest) {
 
     const base = getBase();
 
-    // Look up the Category record ID from name
+    // Look up Category record ID from name
     let categoryRecordId: string | null = null;
     try {
-      const categoryRecords = await base("Categories")
+      const catRecords = await base("Categories")
         .select({
           filterByFormula: `LOWER({Category Name}) = LOWER('${body.category.replace(/'/g, "\\'")}')`,
           maxRecords: 1,
         })
         .all();
-      if (categoryRecords.length > 0) {
-        categoryRecordId = categoryRecords[0].id;
+      if (catRecords.length > 0) {
+        categoryRecordId = catRecords[0].id;
       }
     } catch (catErr) {
       console.warn("Category lookup failed:", catErr);
     }
 
-    // Calculate weighted score
-    const weightedScore =
-      0.1 * body.scores.M +
-      0.5 * body.scores.E +
-      0.2 * body.scores.A +
-      0.2 * body.scores.T;
-    const roundedScore = Math.round(weightedScore * 1000) / 1000;
-
-    // Build notes string with judge info
-    const noteParts: string[] = [];
-    if (body.judgeId) noteParts.push(`Judge: ${body.judgeId}`);
-    noteParts.push(`Category: ${body.category}`);
-    noteParts.push(`Scores: M=${body.scores.M} E=${body.scores.E} A=${body.scores.A} T=${body.scores.T}`);
-    noteParts.push(`Weighted: ${roundedScore}`);
-    if (body.notes) noteParts.push(body.notes);
-    const notesString = noteParts.join(" | ");
-
-    // Try progressively simpler field sets until one works
-    const fieldSets: Partial<Airtable.FieldSet>[] = [
-      // Attempt 1: All fields
-      {
-        Event: [body.eventId],
-        Team: [body.teamId],
-        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
-        MEAT_M: body.scores.M,
-        MEAT_E: body.scores.E,
-        MEAT_A: body.scores.A,
-        MEAT_T: body.scores.T,
-        "Weighted Score": roundedScore,
-        "Submitted At": new Date().toISOString(),
-        Notes: notesString,
-      },
-      // Attempt 2: Links + MEAT scores only
-      {
-        Event: [body.eventId],
-        Team: [body.teamId],
-        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
-        MEAT_M: body.scores.M,
-        MEAT_E: body.scores.E,
-        MEAT_A: body.scores.A,
-        MEAT_T: body.scores.T,
-      },
-      // Attempt 3: Links + Notes only (scores in notes as backup)
-      {
-        Event: [body.eventId],
-        Team: [body.teamId],
-        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
-        Notes: notesString,
-      },
-      // Attempt 4: Just link fields
-      {
-        Event: [body.eventId],
-        Team: [body.teamId],
-        ...(categoryRecordId ? { Category: [categoryRecordId] } : {}),
-      },
-      // Attempt 5: Bare minimum — just event + team
-      {
-        Event: [body.eventId],
-        Team: [body.teamId],
-      },
-    ];
-
-    let record;
-    let lastError: unknown = null;
-
-    for (let i = 0; i < fieldSets.length; i++) {
-      try {
-        record = await base("Turn-Ins").create(fieldSets[i]);
-        if (i > 0) {
-          console.warn(
-            `Turn-In created with field set attempt ${i + 1} (simpler fields)`
-          );
-        }
-        break;
-      } catch (err: unknown) {
-        lastError = err;
-        const isFieldError =
-          err &&
-          typeof err === "object" &&
-          "error" in err &&
-          (err as { error: string }).error === "UNKNOWN_FIELD_NAME";
-
-        if (isFieldError && i < fieldSets.length - 1) {
-          console.warn(
-            `Turn-In attempt ${i + 1} failed:`,
-            (err as unknown as { message?: string }).message || "unknown field"
-          );
-          continue;
-        }
-        // Not a field error or last attempt — throw
-        throw err;
+    // Look up Judge record ID from name/ID
+    let judgeRecordId: string | null = null;
+    try {
+      const judgeRecords = await base("Judges")
+        .select({
+          filterByFormula: `OR(LOWER({Judge Name}) = LOWER('${body.judgeId.replace(/'/g, "\\'")}'), RECORD_ID() = '${body.judgeId}')`,
+          maxRecords: 1,
+        })
+        .all();
+      if (judgeRecords.length > 0) {
+        judgeRecordId = judgeRecords[0].id;
       }
+    } catch (judgeErr) {
+      console.warn("Judge lookup failed:", judgeErr);
     }
 
-    if (!record) {
-      const errMsg =
-        lastError && typeof lastError === "object" && "message" in lastError
-          ? (lastError as { message: string }).message
-          : "All field combinations failed";
-      return NextResponse.json(
-        { success: false, error: errMsg },
-        { status: 500 }
-      );
+    // Calculate total score
+    const totalScore = body.scores.M + body.scores.E + body.scores.A + body.scores.T;
+
+    // Build the BBQ Report Card record
+    const fields: Partial<Airtable.FieldSet> = {
+      Event: [body.eventId],
+      Team: [body.teamId],
+      "Mis En Place (out of 10)": body.scores.M,
+      "Taste (out of 55)": body.scores.E,
+      "Appearance (out of 15)": body.scores.A,
+      "Texture (out of 20)": body.scores.T,
+      "Total Score": totalScore,
+    };
+
+    if (categoryRecordId) {
+      fields["Category"] = [categoryRecordId];
     }
+
+    if (judgeRecordId) {
+      fields["Judge"] = [judgeRecordId];
+    }
+
+    // Build notes
+    const noteParts: string[] = [];
+    if (!judgeRecordId) noteParts.push(`Judge: ${body.judgeId}`);
+    if (body.notes) noteParts.push(body.notes);
+    if (noteParts.length > 0) {
+      fields["Notes"] = noteParts.join(" | ");
+    }
+
+    const record = await base("BBQ Report Cards").create(fields);
 
     return NextResponse.json({
       success: true,
       data: {
         id: record.id,
-        weightedScore: roundedScore,
+        totalScore,
         message: "Score submitted successfully",
       },
     });
   } catch (error) {
     console.error("Score submission error:", error);
-    // Return the actual error message so we can debug
     const message =
       error instanceof Error
         ? error.message
