@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
       console.warn("Judge lookup failed:", judgeErr);
     }
 
-    // Calculate total score
+    // Total is computed by Airtable formula — we just send the components
     const totalScore = body.scores.M + body.scores.E + body.scores.A + body.scores.T;
 
     // Build the BBQ Report Card record
@@ -127,7 +127,6 @@ export async function POST(request: NextRequest) {
       "Taste (out of 55)": body.scores.E,
       "Appearance (out of 15)": body.scores.A,
       "Texture (out of 20)": body.scores.T,
-      "Total Score": totalScore,
     };
 
     if (categoryRecordId) {
