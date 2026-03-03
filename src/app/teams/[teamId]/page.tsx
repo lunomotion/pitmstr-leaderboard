@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import DivisionBadge from "@/components/DivisionBadge";
+import StateFlag from "@/components/StateFlag";
 import {
   ArrowLeft,
   Loader2,
@@ -15,6 +16,12 @@ import {
   User,
   Mail,
   ChevronRight,
+  Camera,
+  Globe,
+  Award,
+  Star,
+  ImageIcon,
+  Handshake,
 } from "lucide-react";
 import type { Team, TeamMember, School as SchoolType } from "@/lib/types";
 import { formatStateHSBBQ } from "@/lib/format";
@@ -117,34 +124,53 @@ export default function TeamDetailPage() {
             Back to Teams
           </Link>
 
-          {/* Team info */}
-          <div className="flex items-center gap-2 mb-3">
-            <DivisionBadge division={team.division} />
+          {/* Team info with State Flag */}
+          <div className="flex items-start gap-4">
+            {/* State Flag */}
             {team.state && (
-              <span className="flex items-center gap-1 text-sm text-white/70">
-                <MapPin className="w-4 h-4" />
-                {formatStateHSBBQ(team.state)}
-              </span>
+              <div className="hidden sm:flex flex-col items-center gap-1 pt-1">
+                <StateFlag stateCode={team.state} size="lg" />
+                <span className="text-[10px] text-white/50 font-medium uppercase tracking-wider">
+                  {formatStateHSBBQ(team.state)}
+                </span>
+              </div>
             )}
+
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3">
+                <DivisionBadge division={team.division} />
+                {team.state && (
+                  <span className="flex items-center gap-1.5 text-sm text-white/70">
+                    <span className="sm:hidden">
+                      <StateFlag stateCode={team.state} size="sm" />
+                    </span>
+                    <MapPin className="w-4 h-4 hidden sm:block" />
+                    {formatStateHSBBQ(team.state)}
+                  </span>
+                )}
+              </div>
+
+              <h1
+                className="text-3xl md:text-4xl font-bold mb-2"
+                style={{ fontFamily: "var(--font-oswald)" }}
+              >
+                {team.name}
+              </h1>
+
+              {team.schoolName && (
+                <p className="text-white/80 flex items-center gap-2">
+                  <School className="w-5 h-5" />
+                  {team.schoolName}
+                </p>
+              )}
+
+              {team.coach && (
+                <p className="text-white/60 text-sm mt-2">
+                  Coach: {team.coach}
+                </p>
+              )}
+            </div>
           </div>
-
-          <h1
-            className="text-3xl md:text-4xl font-bold mb-2"
-            style={{ fontFamily: "var(--font-oswald)" }}
-          >
-            {team.name}
-          </h1>
-
-          {team.schoolName && (
-            <p className="text-white/80 flex items-center gap-2">
-              <School className="w-5 h-5" />
-              {team.schoolName}
-            </p>
-          )}
-
-          {team.coach && (
-            <p className="text-white/60 text-sm mt-2">Coach: {team.coach}</p>
-          )}
         </div>
       </section>
 
@@ -255,6 +281,38 @@ export default function TeamDetailPage() {
           )}
         </section>
 
+        {/* Awards & Championships */}
+        <section className="mb-8">
+          <h2
+            className="text-lg font-bold text-smoke-black mb-4"
+            style={{ fontFamily: "var(--font-oswald)" }}
+          >
+            AWARDS & CHAMPIONSHIPS
+          </h2>
+          <div className="bg-white rounded-xl border border-card-border p-6">
+            <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="text-center p-3 bg-amber-50 rounded-lg border border-amber-100">
+                <Star className="w-6 h-6 text-amber-500 mx-auto mb-1" />
+                <p className="text-xs text-slate-500">Regional</p>
+                <p className="text-lg font-bold text-slate-900">--</p>
+              </div>
+              <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <Award className="w-6 h-6 text-blue-500 mx-auto mb-1" />
+                <p className="text-xs text-slate-500">State</p>
+                <p className="text-lg font-bold text-slate-900">--</p>
+              </div>
+              <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                <Trophy className="w-6 h-6 text-purple-500 mx-auto mb-1" />
+                <p className="text-xs text-slate-500">National</p>
+                <p className="text-lg font-bold text-slate-900">--</p>
+              </div>
+            </div>
+            <p className="text-medium-grey text-sm text-center">
+              Championship records will populate as events are completed
+            </p>
+          </div>
+        </section>
+
         {/* Competition History */}
         <section className="mb-8">
           <h2
@@ -268,6 +326,66 @@ export default function TeamDetailPage() {
             <p className="text-smoke-black font-semibold">Coming Soon</p>
             <p className="text-medium-grey text-sm mt-1">
               Competition results and rankings will be displayed here
+            </p>
+          </div>
+        </section>
+
+        {/* Sponsor Graphics */}
+        <section className="mb-8">
+          <h2
+            className="text-lg font-bold text-smoke-black mb-4"
+            style={{ fontFamily: "var(--font-oswald)" }}
+          >
+            TEAM SPONSORS
+          </h2>
+          <div className="bg-white rounded-xl border border-card-border p-8 text-center">
+            <Handshake className="w-12 h-12 mx-auto mb-4 text-neutral-grey" />
+            <p className="text-smoke-black font-semibold">
+              Sponsor space available
+            </p>
+            <p className="text-medium-grey text-sm mt-1">
+              Team sponsor logos and partnerships will be displayed here
+            </p>
+          </div>
+        </section>
+
+        {/* Photo Gallery */}
+        <section className="mb-8">
+          <h2
+            className="text-lg font-bold text-smoke-black mb-4"
+            style={{ fontFamily: "var(--font-oswald)" }}
+          >
+            PHOTO GALLERY
+          </h2>
+          <div className="bg-white rounded-xl border border-card-border p-8 text-center">
+            <Camera className="w-12 h-12 mx-auto mb-4 text-neutral-grey" />
+            <p className="text-smoke-black font-semibold">No photos yet</p>
+            <p className="text-medium-grey text-sm mt-1">
+              Team photos and event highlights will appear here
+            </p>
+          </div>
+        </section>
+
+        {/* Social Media Links */}
+        <section className="mb-8">
+          <h2
+            className="text-lg font-bold text-smoke-black mb-4"
+            style={{ fontFamily: "var(--font-oswald)" }}
+          >
+            CONNECT
+          </h2>
+          <div className="bg-white rounded-xl border border-card-border p-6">
+            <div className="flex items-center justify-center gap-4">
+              <div className="p-3 rounded-full bg-slate-100 text-slate-400">
+                <Globe className="w-5 h-5" />
+              </div>
+              <div className="p-3 rounded-full bg-slate-100 text-slate-400">
+                <ImageIcon className="w-5 h-5" />
+              </div>
+            </div>
+            <p className="text-medium-grey text-sm text-center mt-3">
+              Social media links will be added when the team sets up their
+              profile
             </p>
           </div>
         </section>

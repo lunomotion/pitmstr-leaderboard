@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "npx tsx scripts/seed-demo-data.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.37.3",
@@ -27,7 +28,9 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
+    "dotenv": "^16.4.7",
     "eslint-config-next": "16.1.4",
+    "tsx": "^4.19.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

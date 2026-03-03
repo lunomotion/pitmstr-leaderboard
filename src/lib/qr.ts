@@ -17,7 +17,9 @@ import QRCode from "qrcode";
 // ---------------------------------------------------------------------------
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_APP_URL || "https://highschoolbbqleague.com";
+  process.env.NEXT_PUBLIC_APP_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "https://highschoolbbqleague.com";
 
 // ---------------------------------------------------------------------------
 // Types

@@ -19,6 +19,7 @@ interface DashboardStats {
   teams: number;
   schools: number;
   students: number;
+  states: number;
   loading: boolean;
   error: string | null;
 }
@@ -29,6 +30,7 @@ export default function AdminDashboard() {
     teams: 0,
     schools: 0,
     students: 0,
+    states: 0,
     loading: true,
     error: null,
   });
@@ -44,7 +46,8 @@ export default function AdminDashboard() {
             events: json.data.events || 0,
             teams: json.data.teams || 0,
             schools: json.data.schools || 0,
-            students: json.data.states || 0, // Using states count for now
+            students: json.data.students || 0,
+            states: json.data.states || 0,
             loading: false,
             error: null,
           });
@@ -89,11 +92,11 @@ export default function AdminDashboard() {
       gradient: "from-amber-500 to-orange-500",
     },
     {
-      label: "States",
+      label: "Students",
       value: stats.students,
       icon: GraduationCap,
-      href: "/admin/teams",
-      trend: "Active",
+      href: "/admin/students",
+      trend: `${stats.states} states`,
       gradient: "from-emerald-500 to-emerald-600",
     },
   ];
@@ -119,7 +122,7 @@ export default function AdminDashboard() {
     },
     {
       label: "View Turn-Ins",
-      description: "Check submissions",
+      description: "Judge score submissions",
       href: "/admin/turn-ins",
       icon: Trophy,
     },

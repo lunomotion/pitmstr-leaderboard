@@ -23,10 +23,11 @@ export async function GET() {
     const base = getBase();
 
     // Fetch counts from each table in parallel
-    const [eventsRecords, teamsRecords, chartersRecords] = await Promise.all([
+    const [eventsRecords, teamsRecords, chartersRecords, studentsRecords] = await Promise.all([
       base("Events").select({ fields: [] }).all(),
       base("Teams").select({ fields: ["State"] }).all(),
       base("Charter").select({ fields: [] }).all(),
+      base("Students").select({ fields: [] }).all(),
     ]);
 
     // Count unique states from teams that actually have teams registered
@@ -44,6 +45,7 @@ export async function GET() {
         events: eventsRecords.length,
         teams: teamsRecords.length,
         schools: chartersRecords.length,
+        students: studentsRecords.length,
         states: uniqueStates.size,
       },
     });
