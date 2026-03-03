@@ -12,12 +12,18 @@ const isPublicRoute = createRouteMatcher([
   "/schools(.*)",
   "/knowledge-base(.*)",
 
+  // QR code scan routes (judges access without login)
+  "/scan(.*)",
+
   // Public API routes (read-only data)
   "/api/events(.*)",
   "/api/leaderboard(.*)",
   "/api/stats(.*)",
   "/api/teams(.*)",
   "/api/schools(.*)",
+
+  // Scoring APIs (judges submit via QR scan, no login)
+  "/api/scoring(.*)",
 
   // Clerk webhook (called by Clerk servers, not users)
   "/api/webhooks/clerk",
