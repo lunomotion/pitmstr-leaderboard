@@ -31,17 +31,32 @@ interface DivisionOption {
   name: string;
 }
 
-const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
-  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
-  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
-  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
-  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
-  "New Hampshire", "New Jersey", "New Mexico", "New York",
-  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
-  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
-  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
-  "West Virginia", "Wisconsin", "Wyoming",
+const US_STATES: { abbr: string; name: string }[] = [
+  { abbr: "AL", name: "Alabama" }, { abbr: "AK", name: "Alaska" },
+  { abbr: "AZ", name: "Arizona" }, { abbr: "AR", name: "Arkansas" },
+  { abbr: "CA", name: "California" }, { abbr: "CO", name: "Colorado" },
+  { abbr: "CT", name: "Connecticut" }, { abbr: "DE", name: "Delaware" },
+  { abbr: "FL", name: "Florida" }, { abbr: "GA", name: "Georgia" },
+  { abbr: "HI", name: "Hawaii" }, { abbr: "ID", name: "Idaho" },
+  { abbr: "IL", name: "Illinois" }, { abbr: "IN", name: "Indiana" },
+  { abbr: "IA", name: "Iowa" }, { abbr: "KS", name: "Kansas" },
+  { abbr: "KY", name: "Kentucky" }, { abbr: "LA", name: "Louisiana" },
+  { abbr: "ME", name: "Maine" }, { abbr: "MD", name: "Maryland" },
+  { abbr: "MA", name: "Massachusetts" }, { abbr: "MI", name: "Michigan" },
+  { abbr: "MN", name: "Minnesota" }, { abbr: "MS", name: "Mississippi" },
+  { abbr: "MO", name: "Missouri" }, { abbr: "MT", name: "Montana" },
+  { abbr: "NE", name: "Nebraska" }, { abbr: "NV", name: "Nevada" },
+  { abbr: "NH", name: "New Hampshire" }, { abbr: "NJ", name: "New Jersey" },
+  { abbr: "NM", name: "New Mexico" }, { abbr: "NY", name: "New York" },
+  { abbr: "NC", name: "North Carolina" }, { abbr: "ND", name: "North Dakota" },
+  { abbr: "OH", name: "Ohio" }, { abbr: "OK", name: "Oklahoma" },
+  { abbr: "OR", name: "Oregon" }, { abbr: "PA", name: "Pennsylvania" },
+  { abbr: "RI", name: "Rhode Island" }, { abbr: "SC", name: "South Carolina" },
+  { abbr: "SD", name: "South Dakota" }, { abbr: "TN", name: "Tennessee" },
+  { abbr: "TX", name: "Texas" }, { abbr: "UT", name: "Utah" },
+  { abbr: "VT", name: "Vermont" }, { abbr: "VA", name: "Virginia" },
+  { abbr: "WA", name: "Washington" }, { abbr: "WV", name: "West Virginia" },
+  { abbr: "WI", name: "Wisconsin" }, { abbr: "WY", name: "Wyoming" },
 ];
 
 export default function AdminTeamsPage() {
@@ -58,7 +73,6 @@ export default function AdminTeamsPage() {
   const [newTeam, setNewTeam] = useState({
     name: "",
     state: "",
-    customState: "",
     divisionId: "",
     coach: "",
   });
@@ -99,13 +113,12 @@ export default function AdminTeamsPage() {
     setIsSubmitting(true);
 
     try {
-      const stateValue = newTeam.state === "other" ? newTeam.customState : newTeam.state;
       const res = await fetch("/api/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: newTeam.name,
-          state: stateValue,
+          state: newTeam.state,
           divisionId: newTeam.divisionId,
           coach: newTeam.coach,
         }),
@@ -114,7 +127,7 @@ export default function AdminTeamsPage() {
 
       if (json.success) {
         setShowAddModal(false);
-        setNewTeam({ name: "", state: "", customState: "", divisionId: "", coach: "" });
+        setNewTeam({ name: "", state: "", divisionId: "", coach: "" });
         fetchTeams();
       } else {
         alert("Failed to create team: " + json.error);
@@ -389,24 +402,14 @@ export default function AdminTeamsPage() {
                 </label>
                 <select
                   value={newTeam.state}
-                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value, customState: "" })}
+                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
                 >
                   <option value="">Select a state...</option>
                   {US_STATES.map((s) => (
-                    <option key={s} value={s}>{s} HSBBQ</option>
+                    <option key={s.abbr} value={s.abbr}>{s.name} HSBBQ</option>
                   ))}
-                  <option value="other">Other (Type Here)</option>
                 </select>
-                {newTeam.state === "other" && (
-                  <input
-                    type="text"
-                    value={newTeam.customState}
-                    onChange={(e) => setNewTeam({ ...newTeam, customState: e.target.value })}
-                    className="w-full mt-2 px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
-                    placeholder="Enter state name"
-                  />
-                )}
               </div>
 
               <div>
