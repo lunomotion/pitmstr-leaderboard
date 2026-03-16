@@ -192,15 +192,21 @@ export async function getEvents(options?: {
         imageUrl: getImageUrl(record.get("Event Photo")),
       };
 
-      // Determine status from date
-      const eventDate = new Date(event.date);
-      const now = new Date();
-      if (eventDate > now) {
-        event.status = "upcoming";
-      } else if (eventDate.toDateString() === now.toDateString()) {
-        event.status = "live";
+      // Check for manual status override from Airtable
+      const statusOverride = record.get("Status Override") as string | undefined;
+      if (statusOverride && ["live", "upcoming", "completed", "cancelled"].includes(statusOverride.toLowerCase())) {
+        event.status = statusOverride.toLowerCase() as EventStatus;
       } else {
-        event.status = "completed";
+        // Determine status from date
+        const eventDate = new Date(event.date);
+        const now = new Date();
+        if (eventDate > now) {
+          event.status = "upcoming";
+        } else if (eventDate.toDateString() === now.toDateString()) {
+          event.status = "live";
+        } else {
+          event.status = "completed";
+        }
       }
 
       // Filter by status if specified
@@ -248,15 +254,21 @@ export async function getEvent(eventId: string): Promise<Event | null> {
       imageUrl: getImageUrl(record.get("Event Photo")),
     };
 
-    // Determine status from date
-    const eventDate = new Date(event.date);
-    const now = new Date();
-    if (eventDate > now) {
-      event.status = "upcoming";
-    } else if (eventDate.toDateString() === now.toDateString()) {
-      event.status = "live";
+    // Check for manual status override from Airtable
+    const statusOverride = record.get("Status Override") as string | undefined;
+    if (statusOverride && ["live", "upcoming", "completed", "cancelled"].includes(statusOverride.toLowerCase())) {
+      event.status = statusOverride.toLowerCase() as EventStatus;
     } else {
-      event.status = "completed";
+      // Determine status from date
+      const eventDate = new Date(event.date);
+      const now = new Date();
+      if (eventDate > now) {
+        event.status = "upcoming";
+      } else if (eventDate.toDateString() === now.toDateString()) {
+        event.status = "live";
+      } else {
+        event.status = "completed";
+      }
     }
 
     return event;
