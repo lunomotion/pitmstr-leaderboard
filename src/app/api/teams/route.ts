@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchTeams, logAuditEvent } from "@/lib/airtable";
-import { requirePermission, isAuthError } from "@/lib/auth";
+import { searchTeams } from "@/lib/airtable";
 import Airtable from "airtable";
 
 // Lazy initialization of Airtable base
@@ -44,14 +43,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a new team (admin + teacher)
+// Create a new team
 export async function POST(request: NextRequest) {
   try {
-    const authResult = await requirePermission("teams:create");
-    if (isAuthError(authResult)) return authResult;
-
     const body = await request.json();
-    const { name, schoolId, division, coach, state } = body;
+    const { name, schoolId, divisionId, coach, state } = body;
 
     if (!name) {
       return NextResponse.json(
@@ -70,11 +66,9 @@ export async function POST(request: NextRequest) {
 
     if (coach) fields["Advisor / Coach"] = coach;
     if (schoolId) fields["Charter"] = [schoolId];
-    if (division) fields["Division"] = [division];
+    if (divisionId) fields["Division"] = [divisionId];
 
     const record = await base("Teams").create(fields);
-
-    await logAuditEvent(authResult.userId, "team.created", "team", record.id, { name });
 
     return NextResponse.json({
       success: true,
@@ -93,12 +87,9 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Delete a team (admin only)
+// Delete a team
 export async function DELETE(request: NextRequest) {
   try {
-    const authResult = await requirePermission("teams:delete");
-    if (isAuthError(authResult)) return authResult;
-
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get("id");
 
@@ -111,8 +102,6 @@ export async function DELETE(request: NextRequest) {
 
     const base = getBase();
     await base("Teams").destroy(teamId);
-
-    await logAuditEvent(authResult.userId, "team.deleted", "team", teamId);
 
     return NextResponse.json({
       success: true,

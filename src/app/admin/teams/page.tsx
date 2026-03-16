@@ -26,6 +26,24 @@ interface Team {
   coach?: string;
 }
 
+interface DivisionOption {
+  id: string;
+  name: string;
+}
+
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+  "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+  "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+  "New Hampshire", "New Jersey", "New Mexico", "New York",
+  "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+  "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+  "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+  "West Virginia", "Wisconsin", "Wyoming",
+];
+
 export default function AdminTeamsPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,12 +52,14 @@ export default function AdminTeamsPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [divisions, setDivisions] = useState<DivisionOption[]>([]);
 
   // Form state
   const [newTeam, setNewTeam] = useState({
     name: "",
     state: "",
-    division: "HSBBQ",
+    customState: "",
+    divisionId: "",
     coach: "",
   });
 
@@ -57,8 +77,21 @@ export default function AdminTeamsPage() {
     }
   }
 
+  async function fetchDivisions() {
+    try {
+      const res = await fetch("/api/admin/lookups?table=divisions");
+      const json = await res.json();
+      if (json.success && json.data) {
+        setDivisions(json.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch divisions:", err);
+    }
+  }
+
   useEffect(() => {
     fetchTeams();
+    fetchDivisions();
   }, []);
 
   async function handleAddTeam(e: React.FormEvent) {
@@ -66,16 +99,22 @@ export default function AdminTeamsPage() {
     setIsSubmitting(true);
 
     try {
+      const stateValue = newTeam.state === "other" ? newTeam.customState : newTeam.state;
       const res = await fetch("/api/teams", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTeam),
+        body: JSON.stringify({
+          name: newTeam.name,
+          state: stateValue,
+          divisionId: newTeam.divisionId,
+          coach: newTeam.coach,
+        }),
       });
       const json = await res.json();
 
       if (json.success) {
         setShowAddModal(false);
-        setNewTeam({ name: "", state: "", division: "HSBBQ", coach: "" });
+        setNewTeam({ name: "", state: "", customState: "", divisionId: "", coach: "" });
         fetchTeams();
       } else {
         alert("Failed to create team: " + json.error);
@@ -348,13 +387,26 @@ export default function AdminTeamsPage() {
                 <label className="block text-sm font-medium text-slate-700 mb-1">
                   State
                 </label>
-                <input
-                  type="text"
+                <select
                   value={newTeam.state}
-                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value })}
+                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value, customState: "" })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
-                  placeholder="e.g., TX"
-                />
+                >
+                  <option value="">Select a state...</option>
+                  {US_STATES.map((s) => (
+                    <option key={s} value={s}>{s} HSBBQ</option>
+                  ))}
+                  <option value="other">Other (Type Here)</option>
+                </select>
+                {newTeam.state === "other" && (
+                  <input
+                    type="text"
+                    value={newTeam.customState}
+                    onChange={(e) => setNewTeam({ ...newTeam, customState: e.target.value })}
+                    className="w-full mt-2 px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
+                    placeholder="Enter state name"
+                  />
+                )}
               </div>
 
               <div>
@@ -362,12 +414,14 @@ export default function AdminTeamsPage() {
                   Division
                 </label>
                 <select
-                  value={newTeam.division}
-                  onChange={(e) => setNewTeam({ ...newTeam, division: e.target.value })}
+                  value={newTeam.divisionId}
+                  onChange={(e) => setNewTeam({ ...newTeam, divisionId: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
                 >
-                  <option value="HSBBQ">High School (HSBBQ)</option>
-                  <option value="MSBBQ">Middle School (MSBBQ)</option>
+                  <option value="">Select a division...</option>
+                  {divisions.map((d) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                  ))}
                 </select>
               </div>
 
