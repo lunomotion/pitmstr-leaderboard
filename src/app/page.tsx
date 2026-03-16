@@ -26,6 +26,20 @@ const SAMPLE_EVENTS: Event[] = [
     categories: ["Brisket", "Ribs", "Chicken"],
   },
   {
+    id: "sample_1b",
+    createdTime: "2025-01-01T00:00:00.000Z",
+    name: "San Antonio Smoke Classic",
+    date: new Date().toISOString().split('T')[0], // Today - LIVE
+    location: "San Antonio, TX",
+    city: "San Antonio",
+    state: "TX",
+    division: "HSBBQ",
+    status: "live",
+    description: "Live competition in the heart of San Antonio with teams from across South Texas.",
+    registeredTeams: 36,
+    categories: ["Brisket", "Ribs", "Chicken", "Pork"],
+  },
+  {
     id: "sample_2",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Oklahoma Smoke Showdown",

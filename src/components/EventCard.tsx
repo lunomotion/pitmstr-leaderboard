@@ -35,9 +35,21 @@ export default function EventCard({ event, onDelete }: EventCardProps) {
     });
   };
 
+  const isLive = event.status === "live";
+
   return (
     <Link href={`/leaderboard/${event.id}`}>
-      <div className="card card-hover p-4 cursor-pointer">
+      <div className={`card card-hover p-4 cursor-pointer relative ${isLive ? "ring-2 ring-bbq-red/60 shadow-lg shadow-bbq-red/10" : ""}`}>
+        {/* LIVE broadcast indicator — bottom-right corner */}
+        {isLive && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-bbq-red text-white px-2.5 py-1 rounded-md shadow-md z-10">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
+            </span>
+            <span className="text-xs font-bold tracking-wider">LIVE</span>
+          </div>
+        )}
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 min-w-0">
             {/* Status and Division badges */}
@@ -45,7 +57,7 @@ export default function EventCard({ event, onDelete }: EventCardProps) {
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${statusColors[event.status]}`}
               >
-                {event.status === "live" && <Flame className="w-3 h-3" />}
+                {isLive && <Flame className="w-3 h-3" />}
                 {statusLabels[event.status]}
               </span>
               <DivisionBadge division={event.division} />
