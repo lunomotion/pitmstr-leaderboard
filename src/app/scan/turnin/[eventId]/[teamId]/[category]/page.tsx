@@ -8,6 +8,9 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
+  ArrowLeft,
+  Eye,
+  ShieldCheck,
 } from "lucide-react";
 
 const COMPONENTS = [
@@ -38,6 +41,7 @@ const COMPONENTS = [
 ];
 
 type ComponentKey = "M" | "E" | "A" | "T";
+type Step = "entry" | "confirm" | "submitted";
 
 export default function JudgeScoringPage() {
   const params = useParams();
@@ -47,6 +51,8 @@ export default function JudgeScoringPage() {
     .replace(/-/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
+  const [step, setStep] = useState<Step>("entry");
+  const [showFinalConfirm, setShowFinalConfirm] = useState(false);
   const [scores, setScores] = useState<Record<ComponentKey, string>>({
     M: "",
     E: "",
@@ -56,7 +62,6 @@ export default function JudgeScoringPage() {
   const [judgeId, setJudgeId] = useState("");
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submittedTotal, setSubmittedTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
@@ -70,13 +75,13 @@ export default function JudgeScoringPage() {
     }
   }
 
-  // Calculate running total
   const runningTotal = COMPONENTS.reduce((sum, comp) => {
     const val = parseFloat(scores[comp.key]);
     return sum + (isNaN(val) ? 0 : val);
   }, 0);
 
-  async function handleSubmit(e: React.FormEvent) {
+  // Step 1 → Step 2: validate then advance
+  function handleReviewScores(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
 
@@ -85,7 +90,6 @@ export default function JudgeScoringPage() {
       return;
     }
 
-    // Validate all scores are filled and within range
     for (const comp of COMPONENTS) {
       const val = parseFloat(scores[comp.key]);
       if (scores[comp.key] === "" || isNaN(val)) {
@@ -98,6 +102,13 @@ export default function JudgeScoringPage() {
       }
     }
 
+    setStep("confirm");
+  }
+
+  // Step 3: actual API submission
+  async function handleFinalSubmit() {
+    setShowFinalConfirm(false);
+    setError(null);
     setSubmitting(true);
 
     try {
@@ -123,19 +134,47 @@ export default function JudgeScoringPage() {
 
       if (!data.success) {
         setError(data.error || "Failed to submit scores");
+        setStep("confirm");
         return;
       }
 
       setSubmittedTotal(data.data?.totalScore || runningTotal);
-      setSubmitted(true);
+      setStep("submitted");
     } catch {
       setError("Network error — please try again");
+      setStep("confirm");
     } finally {
       setSubmitting(false);
     }
   }
 
-  if (submitted) {
+  function resetForm() {
+    setStep("entry");
+    setShowFinalConfirm(false);
+    setScores({ M: "", E: "", A: "", T: "" });
+    setNotes("");
+    setError(null);
+  }
+
+  // ── Header (shared across all steps) ──
+  const header = (
+    <div className="bg-gradient-to-r from-bbq-red to-red-700 text-white px-4 py-6">
+      <div className="max-w-lg mx-auto">
+        <div className="flex items-center gap-3 mb-2">
+          <ChefHat className="w-8 h-8" />
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider opacity-80">
+              NHSBBQA® Judge Scoring
+            </p>
+            <h1 className="text-xl font-bold">{category}</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // ── Step: Submitted (success) ──
+  if (step === "submitted") {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
@@ -154,11 +193,7 @@ export default function JudgeScoringPage() {
             Judge: {judgeId} — Thank you for judging.
           </p>
           <button
-            onClick={() => {
-              setSubmitted(false);
-              setScores({ M: "", E: "", A: "", T: "" });
-              setNotes("");
-            }}
+            onClick={resetForm}
             className="text-sm text-americana-blue hover:underline"
           >
             Submit another score
@@ -168,25 +203,158 @@ export default function JudgeScoringPage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-bbq-red to-red-700 text-white px-4 py-6">
-        <div className="max-w-lg mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <ChefHat className="w-8 h-8" />
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wider opacity-80">
-                NHSBBQA® Judge Scoring
-              </p>
-              <h1 className="text-xl font-bold">{category}</h1>
+  // ── Step 2: Confirm Scores ──
+  if (step === "confirm") {
+    return (
+      <div className="min-h-screen bg-slate-50">
+        {header}
+
+        <div className="max-w-lg mx-auto p-4 space-y-4">
+          {/* Step indicator */}
+          <div className="flex items-center justify-center gap-2 py-2">
+            <div className="flex items-center gap-1.5 text-sm font-medium text-amber-600">
+              <Eye className="w-4 h-4" />
+              Step 2 of 3 — Review Your Scores
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="max-w-lg mx-auto p-4 space-y-4">
+          {/* Score summary card */}
+          <div className="bg-white rounded-xl border-2 border-amber-200 overflow-hidden">
+            <div className="px-4 py-3 bg-amber-50 border-b border-amber-200">
+              <h2 className="text-sm font-semibold text-slate-900">
+                Please confirm your scores are correct
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Judge: <span className="font-medium text-slate-700">{judgeId}</span>
+              </p>
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {COMPONENTS.map((comp) => (
+                <div key={comp.key} className="px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-bbq-red">
+                      {comp.key}
+                    </span>
+                    <span className="text-sm text-slate-700">
+                      {comp.label}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-xl font-bold text-slate-900">
+                      {scores[comp.key]}
+                    </span>
+                    <span className="text-sm text-slate-400 ml-1">
+                      / {comp.max}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-4 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+              <span className="text-sm font-semibold text-slate-700">Total Score</span>
+              <div>
+                <span className="text-2xl font-bold text-slate-900">{runningTotal}</span>
+                <span className="text-sm text-slate-400 ml-1">/ 100</span>
+              </div>
+            </div>
+          </div>
+
+          {notes.trim() && (
+            <div className="bg-white rounded-xl border border-slate-200 p-4">
+              <p className="text-xs font-medium text-slate-500 mb-1">Notes</p>
+              <p className="text-sm text-slate-700">{notes}</p>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg p-3">
+              <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={() => setShowFinalConfirm(true)}
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 bg-bbq-red text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-bbq-red/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              {submitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <ShieldCheck className="w-5 h-5" />
+              )}
+              Confirm &amp; Submit
+            </button>
+
+            <button
+              type="button"
+              onClick={() => { setStep("entry"); setError(null); }}
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 border border-slate-200 text-slate-700 py-3 rounded-xl text-sm font-medium hover:bg-slate-50 disabled:opacity-50 transition-all"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Go Back &amp; Edit
+            </button>
+          </div>
+
+          <p className="text-xs text-center text-slate-400">
+            NHSBBQA® M.E.A.T. Scoring | M=10 E=55 A=15 T=20 | Total: 100
+          </p>
+        </div>
+
+        {/* Step 3: Final confirmation modal */}
+        {showFinalConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center">
+              <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-7 h-7 text-amber-600" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">
+                Are you sure?
+              </h2>
+              <p className="text-slate-500 text-sm mb-6">
+                You are submitting a total score of <span className="font-bold text-slate-900">{runningTotal}/100</span> for <span className="font-semibold text-slate-700">{category}</span>. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowFinalConfirm(false)}
+                  className="flex-1 px-4 py-2.5 border border-slate-200 rounded-xl font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleFinalSubmit}
+                  className="flex-1 px-4 py-2.5 bg-bbq-red text-white rounded-xl font-medium hover:bg-bbq-red/90"
+                >
+                  Yes, Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // ── Step 1: Enter Scores ──
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {header}
+
+      <form onSubmit={handleReviewScores} className="max-w-lg mx-auto p-4 space-y-4">
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-2 py-2">
+          <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+            Step 1 of 3 — Enter Scores
+          </div>
+        </div>
+
         {/* Judge Name */}
         <div className="bg-white rounded-xl border border-slate-200 p-4">
           <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -278,18 +446,13 @@ export default function JudgeScoringPage() {
           </div>
         )}
 
-        {/* Submit */}
+        {/* Review button */}
         <button
           type="submit"
-          disabled={submitting}
-          className="w-full flex items-center justify-center gap-2 bg-bbq-red text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-bbq-red/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="w-full flex items-center justify-center gap-2 bg-bbq-red text-white py-3.5 rounded-xl text-sm font-semibold hover:bg-bbq-red/90 transition-all"
         >
-          {submitting ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : (
-            <Send className="w-5 h-5" />
-          )}
-          Submit Scores
+          <Eye className="w-5 h-5" />
+          Review Scores
         </button>
 
         <p className="text-xs text-center text-slate-400">
