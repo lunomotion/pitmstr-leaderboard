@@ -108,6 +108,7 @@ export async function GET(request: NextRequest) {
         eventDate,
         location: event.location || "",
         division: event.division,
+        state: event.state || "",
         teams: teamScores,
         teamsPerPage: perPage,
         topN: topN > 0 ? topN : undefined,

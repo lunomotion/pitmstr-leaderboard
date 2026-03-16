@@ -21,6 +21,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { TeamEventScore, CategoryResult } from "../scoring";
+import { formatStateAssociation } from "../format";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -31,6 +32,8 @@ export interface EventReportProps {
   eventDate: string;
   location: string;
   division: string;
+  /** State abbreviation (e.g., "TX") for association branding */
+  state?: string;
   /** Ranked team scores (already sorted by rankTeams()) */
   teams: TeamEventScore[];
   /** How many teams per page (default 10) */
@@ -259,23 +262,38 @@ function ReportHeader({
   eventDate,
   location,
   division,
+  state,
   logoSrc,
 }: {
   eventName: string;
   eventDate: string;
   location: string;
   division: string;
+  state?: string;
   logoSrc?: string;
 }) {
+  const stateLabel = formatStateAssociation(state);
+
   return (
-    <View style={styles.headerRow}>
-      <View style={styles.headerLeft}>
-        <Text style={styles.eventTitle}>{eventName}</Text>
-        <Text style={styles.eventSubtitle}>{eventDate}</Text>
-        <Text style={styles.eventSubtitle}>{location}</Text>
-        <Text style={styles.divisionBadge}>{division}</Text>
+    <View>
+      {stateLabel && (
+        <Text style={{
+          fontSize: 12,
+          fontFamily: "Helvetica-Bold",
+          textAlign: "center",
+          color: "#1e3a8a",
+          marginBottom: 8,
+        }}>{stateLabel}</Text>
+      )}
+      <View style={styles.headerRow}>
+        <View style={styles.headerLeft}>
+          <Text style={styles.eventTitle}>{eventName}</Text>
+          <Text style={styles.eventSubtitle}>{eventDate}</Text>
+          <Text style={styles.eventSubtitle}>{location}</Text>
+          <Text style={styles.divisionBadge}>{division}</Text>
+        </View>
+        {logoSrc && <Image src={logoSrc} style={styles.logo} />}
       </View>
-      {logoSrc && <Image src={logoSrc} style={styles.logo} />}
     </View>
   );
 }
@@ -427,6 +445,7 @@ export function EventReport({
   eventDate,
   location,
   division,
+  state,
   teams,
   teamsPerPage = 10,
   topN = 0,
@@ -487,6 +506,7 @@ export function EventReport({
             eventDate={eventDate}
             location={location}
             division={division}
+            state={state}
             logoSrc={logoSrc}
           />
 

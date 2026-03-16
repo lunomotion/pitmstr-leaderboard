@@ -24,6 +24,7 @@ import {
 } from "@react-pdf/renderer";
 import { generateTeamQRSheet } from "@/lib/qr";
 import { getEvent, getSchool } from "@/lib/airtable";
+import { formatStateAssociation } from "@/lib/format";
 import type { QRCodeData } from "@/lib/qr";
 import Airtable from "airtable";
 
@@ -41,6 +42,7 @@ interface TeamSheetData {
 
 interface BatchQRSheetProps {
   teams: TeamSheetData[];
+  stateLabel?: string;
   logoSrc?: string;
 }
 
@@ -131,7 +133,7 @@ const styles = StyleSheet.create({
   },
 });
 
-function BatchQRSheet({ teams, logoSrc }: BatchQRSheetProps) {
+function BatchQRSheet({ teams, stateLabel, logoSrc }: BatchQRSheetProps) {
   return React.createElement(
     Document,
     {
@@ -149,6 +151,21 @@ function BatchQRSheet({ teams, logoSrc }: BatchQRSheetProps) {
             View,
             { style: styles.logoContainer },
             React.createElement(Image, { src: logoSrc, style: styles.logo })
+          ),
+        // State Association Branding
+        stateLabel &&
+          React.createElement(
+            Text,
+            {
+              style: {
+                fontSize: 12,
+                fontFamily: "Helvetica-Bold",
+                textAlign: "center",
+                color: "#1e3a8a",
+                marginBottom: 12,
+              },
+            },
+            stateLabel
           ),
         // Team Info
         React.createElement(
@@ -368,8 +385,11 @@ export async function GET(request: NextRequest) {
     const logoSrc = `${baseUrl}/images/nhsbbqa-logo.png`;
 
     // Render single multi-page PDF
+    const stateLabel = formatStateAssociation(event.state);
+
     const element = React.createElement(BatchQRSheet, {
       teams: teamSheets,
+      stateLabel: stateLabel || undefined,
       logoSrc,
     });
 

@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
         district: qrData.district,
         eventName: qrData.eventName,
         codes: qrData.codes,
+        state: event.state || "",
         logoSrc,
       }) as any
     );

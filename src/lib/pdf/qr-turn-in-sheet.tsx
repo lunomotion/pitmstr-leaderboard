@@ -22,6 +22,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { QRCodeData } from "../qr";
+import { formatStateAssociation } from "../format";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -33,6 +34,8 @@ export interface QRTurnInSheetProps {
   district: string;
   eventName: string;
   codes: QRCodeData[];
+  /** State abbreviation (e.g., "TX") for association branding */
+  state?: string;
   /** Path or data URI for the NHSBBQA logo */
   logoSrc?: string;
 }
@@ -120,6 +123,13 @@ const styles = StyleSheet.create({
     fontSize: 7,
     color: "#999999",
   },
+  stateAssociation: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    textAlign: "center" as const,
+    color: "#1e3a8a",
+    marginBottom: 12,
+  },
 });
 
 // ---------------------------------------------------------------------------
@@ -132,8 +142,11 @@ export function QRTurnInSheet({
   district,
   eventName,
   codes,
+  state,
   logoSrc,
 }: QRTurnInSheetProps) {
+  const stateLabel = formatStateAssociation(state);
+
   return (
     <Document
       title={`QR Turn-In Sheet - ${teamName}`}
@@ -146,6 +159,11 @@ export function QRTurnInSheet({
           <View style={styles.logoContainer}>
             <Image src={logoSrc} style={styles.logo} />
           </View>
+        )}
+
+        {/* State Association Branding */}
+        {stateLabel && (
+          <Text style={styles.stateAssociation}>{stateLabel}</Text>
         )}
 
         {/* Team Info */}
