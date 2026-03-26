@@ -203,42 +203,27 @@ export default function Home() {
     <div className="min-h-screen bg-light-grey">
       <Header />
 
-      {/* ===== NEW HERO SECTION ===== */}
-      <section className="relative text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 30%, #1f1f1f 60%, #252525 100%)' }}>
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
-
-        {/* Ambient glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-20" style={{
-          background: 'radial-gradient(ellipse, rgba(198, 40, 40, 0.6) 0%, transparent 70%)',
-        }} />
-
+      {/* ===== HERO SECTION ===== */}
+      <section className="relative overflow-hidden bg-white">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 md:pt-20 pb-8">
-          {/* Logo */}
-          <div className="flex justify-center mb-8">
-            <Image
-              src="/pitmstr-logo-text-white.png"
-              alt="PITMSTR"
-              width={320}
-              height={64}
-              className="h-12 md:h-16 w-auto"
-              priority
-            />
-          </div>
-
           {/* Headline */}
           <h1
-            className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
+            className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-smoke-black"
             style={{ fontFamily: "var(--font-oswald)" }}
           >
-            <span className="text-white">America&apos;s </span>
-            <span className="text-bbq-red">CTE Food Sport</span>
+            America&apos;s CTE Food Sport
           </h1>
 
+          {/* WHERE DREAMS IGNITE tagline */}
+          <p
+            className="text-center text-2xl md:text-3xl text-bbq-red mb-6"
+            style={{ fontFamily: "var(--font-permanent-marker)" }}
+          >
+            WHERE DREAMS IGNITE!
+          </p>
+
           {/* Subtitle */}
-          <p className="text-center text-base sm:text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-center text-base sm:text-lg md:text-xl text-medium-grey max-w-2xl mx-auto mb-10 leading-relaxed">
             The all-in-one competition platform for high school and middle school BBQ programs.
             Real-time scoring, team management, and event operations - built for educators, loved by students.
           </p>
@@ -247,15 +232,15 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               href="/sign-up"
-              className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-lg font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/25"
+              className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-lg font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/20"
               style={{ fontFamily: "var(--font-oswald)" }}
             >
               Register Your School
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
-              href="/leaderboard"
-              className="flex items-center gap-2 px-8 py-4 border border-white/20 text-white rounded-full text-lg font-semibold hover:bg-white/10 transition-all"
+              href="/knowledge-base"
+              className="flex items-center gap-2 px-8 py-4 border border-neutral-grey/30 text-smoke-black rounded-full text-lg font-semibold hover:bg-light-grey transition-all"
               style={{ fontFamily: "var(--font-oswald)" }}
             >
               See How It Works
@@ -276,7 +261,7 @@ export default function Home() {
                   key={i}
                   src={src}
                   alt=""
-                  className="w-9 h-9 rounded-full border-2 border-smoke-black object-cover"
+                  className="w-9 h-9 rounded-full border-2 border-white object-cover shadow-sm"
                 />
               ))}
             </div>
@@ -286,59 +271,31 @@ export default function Home() {
                   <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />
                 ))}
               </div>
-              <span className="text-sm text-white/60 font-medium">
+              <span className="text-sm text-medium-grey font-medium">
                 400+ teams across 14 states
               </span>
             </div>
           </div>
 
           {/* Stats Bar */}
-          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-12">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 bg-bbq-red/20 rounded-full">
-                <MapPin className="w-5 h-5 text-bbq-red" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>14</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">States</p>
-              </div>
+          <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-8">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>14</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">States</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 bg-americana-blue/20 rounded-full">
-                <Users className="w-5 h-5 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>400+</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Teams</p>
-              </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>400+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Teams</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 bg-brisket-brown/20 rounded-full">
-                <School className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>200+</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Schools</p>
-              </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>200+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Schools</p>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-11 h-11 bg-gold/20 rounded-full">
-                <Trophy className="w-5 h-5 text-gold" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>50+</p>
-                <p className="text-xs text-white/50 uppercase tracking-wider">Events</p>
-              </div>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>50+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Events</p>
             </div>
           </div>
-
-          {/* Tagline */}
-          <p
-            className="text-center text-lg md:text-xl text-white/80 italic drop-shadow-md mb-4"
-            style={{ fontFamily: "var(--font-permanent-marker)" }}
-          >
-            &ldquo;COME EAT OUR HOMEWORK!&rdquo;
-          </p>
         </div>
 
         {/* ===== IMAGE CAROUSEL ===== */}
@@ -348,10 +305,18 @@ export default function Home() {
             100% { transform: translateX(-50%); }
           }
         `}</style>
-        <div className="relative w-full overflow-hidden pb-8">
+        <div className="relative w-full overflow-hidden py-8 bg-smoke-black">
           {/* Edge fades */}
           <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #1a1a1a 0%, transparent 100%)' }} />
           <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #1a1a1a 0%, transparent 100%)' }} />
+
+          {/* "COME EAT OUR HOMEWORK" inside carousel band */}
+          <p
+            className="text-center text-sm text-white/40 italic mb-6 tracking-wide"
+            style={{ fontFamily: "var(--font-permanent-marker)" }}
+          >
+            &ldquo;COME EAT OUR HOMEWORK!&rdquo;
+          </p>
 
           {/* Scrolling track */}
           <div
@@ -372,9 +337,7 @@ export default function Home() {
                   alt={card.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                {/* Gradient overlay */}
                 <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%)' }} />
-                {/* Text */}
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <span className="text-[11px] font-semibold text-white/70 uppercase tracking-widest">{card.category}</span>
                   <h3 className="text-lg font-bold text-white mt-1 leading-tight" style={{ fontFamily: "var(--font-oswald)" }}>{card.title}</h3>
