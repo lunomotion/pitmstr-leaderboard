@@ -143,19 +143,16 @@ export default function LeaderboardPage() {
       <Header />
 
       {/* Page Header */}
-      <section className="bg-gradient-to-br from-smoke-black via-americana-blue to-smoke-black text-white py-8 px-4">
+      <section className="bg-white border-b border-card-border py-10 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy className="w-8 h-8 text-gold" />
-            <h1
-              className="text-3xl md:text-4xl font-bold"
-              style={{ fontFamily: "var(--font-oswald)" }}
-            >
-              LEADERBOARDS
-            </h1>
-          </div>
-          <p className="text-white/70">
-            View live scores and rankings from BBQ competitions
+          <h1
+            className="text-4xl md:text-5xl font-bold text-smoke-black mb-2"
+            style={{ fontFamily: "var(--font-oswald)" }}
+          >
+            LEADERBOARD
+          </h1>
+          <p className="text-medium-grey text-lg">
+            Real-time rankings and scores from events nationwide
           </p>
         </div>
       </section>

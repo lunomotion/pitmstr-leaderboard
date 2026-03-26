@@ -6,7 +6,7 @@ import EventCard from "@/components/EventCard";
 import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
 import AlphabetFilter from "@/components/AlphabetFilter";
-import { Calendar, Loader2, Filter, Plus, X, Trash2 } from "lucide-react";
+import { Calendar, Loader2, Filter, Trash2 } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
 import { formatStateHSBBQ } from "@/lib/format";
 
@@ -18,17 +18,8 @@ export default function EventsPage() {
   const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
   const [selectedState, setSelectedState] = useState<string>("all");
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newEvent, setNewEvent] = useState({
-    name: "",
-    date: "",
-    city: "",
-    state: "",
-    division: "HSBBQ",
-    description: "",
-  });
 
   // Get unique states from events
   const availableStates = useMemo(() => {
@@ -55,33 +46,6 @@ export default function EventsPage() {
   useEffect(() => {
     fetchEvents();
   }, []);
-
-  async function handleAddEvent(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newEvent),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        setShowAddModal(false);
-        setNewEvent({ name: "", date: "", city: "", state: "", division: "HSBBQ", description: "" });
-        fetchEvents();
-      } else {
-        alert("Failed to create event: " + json.error);
-      }
-    } catch (err) {
-      console.error("Error creating event:", err);
-      alert("Failed to create event");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   async function handleDeleteEvent(eventId: string) {
     setIsSubmitting(true);
@@ -152,26 +116,17 @@ export default function EventsPage() {
       <Header />
 
       {/* Page Header */}
-      <section className="bg-gradient-to-br from-smoke-black to-americana-blue text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1
-              className="text-3xl md:text-4xl font-bold mb-2"
-              style={{ fontFamily: "var(--font-oswald)" }}
-            >
-              EVENTS
-            </h1>
-            <p className="text-white/70">
-              Browse all BBQ competitions across the nation
-            </p>
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-bbq-red text-white rounded-xl font-medium text-sm hover:bg-bbq-red/90 transition-colors shadow-lg"
+      <section className="bg-white border-b border-card-border py-10 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1
+            className="text-4xl md:text-5xl font-bold text-smoke-black mb-2"
+            style={{ fontFamily: "var(--font-oswald)" }}
           >
-            <Plus className="w-4 h-4" />
-            Add Event
-          </button>
+            EVENTS
+          </h1>
+          <p className="text-medium-grey text-lg">
+            Upcoming competitions, state championships, and invitationals
+          </p>
         </div>
       </section>
 
@@ -338,123 +293,6 @@ export default function EventsPage() {
           </p>
         </div>
       </footer>
-
-      {/* Add Event Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-smoke-black">Add New Event</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-light-grey rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddEvent} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Event Name *
-                </label>
-                <input
-                  type="text"
-                  value={newEvent.name}
-                  onChange={(e) => setNewEvent({ ...newEvent, name: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                  placeholder="e.g., Texas State Championship"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Event Date *
-                </label>
-                <input
-                  type="date"
-                  value={newEvent.date}
-                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-smoke-black mb-1">
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.city}
-                    onChange={(e) => setNewEvent({ ...newEvent, city: e.target.value })}
-                    className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                    placeholder="Fort Worth"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-smoke-black mb-1">
-                    State
-                  </label>
-                  <input
-                    type="text"
-                    value={newEvent.state}
-                    onChange={(e) => setNewEvent({ ...newEvent, state: e.target.value })}
-                    className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                    placeholder="TX"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Division
-                </label>
-                <select
-                  value={newEvent.division}
-                  onChange={(e) => setNewEvent({ ...newEvent, division: e.target.value })}
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                >
-                  <option value="HSBBQ">High School (HSBBQ)</option>
-                  <option value="MSBBQ">Middle School (MSBBQ)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Description
-                </label>
-                <textarea
-                  value={newEvent.description}
-                  onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                  rows={3}
-                  placeholder="Event description..."
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-card-border rounded-xl font-medium text-smoke-black hover:bg-light-grey"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-bbq-red text-white rounded-xl font-medium hover:bg-bbq-red/90 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Adding..." : "Add Event"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (

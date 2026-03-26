@@ -232,7 +232,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               href="/sign-up"
-              className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-lg font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/20"
+              className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-xl font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/20"
               style={{ fontFamily: "var(--font-oswald)" }}
             >
               Register Your School
@@ -240,7 +240,7 @@ export default function Home() {
             </Link>
             <Link
               href="/knowledge-base"
-              className="flex items-center gap-2 px-8 py-4 border border-neutral-grey/30 text-smoke-black rounded-full text-lg font-semibold hover:bg-light-grey transition-all"
+              className="flex items-center gap-2 px-8 py-4 border border-neutral-grey/30 text-smoke-black rounded-full text-xl font-semibold hover:bg-light-grey transition-all"
               style={{ fontFamily: "var(--font-oswald)" }}
             >
               See How It Works
@@ -277,25 +277,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Stats Bar */}
-          <div className="flex flex-wrap justify-center gap-8 md:gap-16 mb-8">
-            <div className="text-center">
-              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>14</p>
-              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">States</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>400+</p>
-              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Teams</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>200+</p>
-              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Schools</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>50+</p>
-              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Events</p>
-            </div>
-          </div>
         </div>
 
         {/* ===== IMAGE CAROUSEL ===== */}
@@ -327,8 +308,11 @@ export default function Home() {
             }}
           >
             {[...CAROUSEL_CARDS, ...CAROUSEL_CARDS].map((card, index) => (
-              <div
+              <a
                 key={index}
+                href="https://www.highschoolbbqleague.com/"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex-shrink-0 relative overflow-hidden rounded-2xl group cursor-pointer"
                 style={{ width: '300px', height: '400px' }}
               >
@@ -342,8 +326,32 @@ export default function Home() {
                   <span className="text-[11px] font-semibold text-white/70 uppercase tracking-widest">{card.category}</span>
                   <h3 className="text-lg font-bold text-white mt-1 leading-tight" style={{ fontFamily: "var(--font-oswald)" }}>{card.title}</h3>
                 </div>
-              </div>
+              </a>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ===== STATS SECTION ===== */}
+      <section className="bg-white py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="flex flex-wrap justify-center gap-12 md:gap-20">
+            <div className="text-center">
+              <p className="text-4xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>14</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">States</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>400+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Teams</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>200+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Schools</p>
+            </div>
+            <div className="text-center">
+              <p className="text-4xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>50+</p>
+              <p className="text-xs text-medium-grey uppercase tracking-wider mt-1">Events</p>
+            </div>
           </div>
         </div>
       </section>

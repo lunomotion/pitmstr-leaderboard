@@ -7,7 +7,7 @@ import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
 import AlphabetFilter from "@/components/AlphabetFilter";
 import DivisionBadge from "@/components/DivisionBadge";
-import { Users, Loader2, Filter, ChevronRight, School, MapPin, Plus, X, Trash2, Flame, Eye } from "lucide-react";
+import { Users, Loader2, Filter, ChevronRight, School, MapPin, Trash2, Flame, Eye } from "lucide-react";
 import type { Team, Division } from "@/lib/types";
 import { formatStateHSBBQ } from "@/lib/format";
 
@@ -18,15 +18,8 @@ export default function TeamsPage() {
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
   const [selectedState, setSelectedState] = useState<string>("all");
   const [activeLetter, setActiveLetter] = useState<string | null>(null);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newTeam, setNewTeam] = useState({
-    name: "",
-    state: "",
-    division: "HSBBQ",
-    coach: "",
-  });
 
   // Get unique states from teams
   const availableStates = useMemo(() => {
@@ -53,33 +46,6 @@ export default function TeamsPage() {
   useEffect(() => {
     fetchTeams();
   }, []);
-
-  async function handleAddTeam(e: React.FormEvent) {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const res = await fetch("/api/teams", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTeam),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        setShowAddModal(false);
-        setNewTeam({ name: "", state: "", division: "HSBBQ", coach: "" });
-        fetchTeams();
-      } else {
-        alert("Failed to create team: " + json.error);
-      }
-    } catch (err) {
-      console.error("Error creating team:", err);
-      alert("Failed to create team");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   async function handleDeleteTeam(teamId: string) {
     setIsSubmitting(true);
@@ -150,26 +116,17 @@ export default function TeamsPage() {
       <Header />
 
       {/* Page Header */}
-      <section className="bg-gradient-to-br from-smoke-black to-brisket-brown text-white py-8 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1
-              className="text-3xl md:text-4xl font-bold mb-2"
-              style={{ fontFamily: "var(--font-oswald)" }}
-            >
-              TEAMS
-            </h1>
-            <p className="text-white/70">
-              Browse BBQ teams from schools across the nation
-            </p>
-          </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-bbq-red text-white rounded-xl font-medium text-sm hover:bg-bbq-red/90 transition-colors shadow-lg"
+      <section className="bg-white border-b border-card-border py-10 px-4">
+        <div className="max-w-7xl mx-auto">
+          <h1
+            className="text-4xl md:text-5xl font-bold text-smoke-black mb-2"
+            style={{ fontFamily: "var(--font-oswald)" }}
           >
-            <Plus className="w-4 h-4" />
-            Add Team
-          </button>
+            TEAMS
+          </h1>
+          <p className="text-medium-grey text-lg">
+            Browse registered teams across all divisions and states
+          </p>
         </div>
       </section>
 
@@ -359,96 +316,6 @@ export default function TeamsPage() {
           </p>
         </div>
       </footer>
-
-      {/* Add Team Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-smoke-black">Add New Team</h2>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="p-2 hover:bg-light-grey rounded-lg"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleAddTeam} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Team Name *
-                </label>
-                <input
-                  type="text"
-                  value={newTeam.name}
-                  onChange={(e) => setNewTeam({ ...newTeam, name: e.target.value })}
-                  required
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                  placeholder="e.g., Smokin' Rebels"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  State
-                </label>
-                <input
-                  type="text"
-                  value={newTeam.state}
-                  onChange={(e) => setNewTeam({ ...newTeam, state: e.target.value })}
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                  placeholder="e.g., TX"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Division
-                </label>
-                <select
-                  value={newTeam.division}
-                  onChange={(e) => setNewTeam({ ...newTeam, division: e.target.value })}
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                >
-                  <option value="HSBBQ">High School (HSBBQ)</option>
-                  <option value="MSBBQ">Middle School (MSBBQ)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-smoke-black mb-1">
-                  Coach / Advisor
-                </label>
-                <input
-                  type="text"
-                  value={newTeam.coach}
-                  onChange={(e) => setNewTeam({ ...newTeam, coach: e.target.value })}
-                  className="w-full px-4 py-2 border border-card-border rounded-xl focus:outline-none focus:ring-2 focus:ring-bbq-red/20"
-                  placeholder="Coach name"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-4 py-2.5 border border-card-border rounded-xl font-medium text-smoke-black hover:bg-light-grey"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 px-4 py-2.5 bg-bbq-red text-white rounded-xl font-medium hover:bg-bbq-red/90 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Adding..." : "Add Team"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
