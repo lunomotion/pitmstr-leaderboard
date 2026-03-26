@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Menu, X, User, LogIn } from "lucide-react";
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
@@ -28,12 +29,14 @@ export default function Header() {
             </button>
 
             <Link href="/" className="flex items-center">
-              <span
-                className="text-xl font-bold italic text-white tracking-tight"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                PITMSTR
-              </span>
+              <Image
+                src="/pitmstr-logo-text-white.png"
+                alt="PITMSTR"
+                width={140}
+                height={28}
+                className="h-6 w-auto"
+                priority
+              />
             </Link>
           </div>
 
