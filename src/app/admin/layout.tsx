@@ -168,26 +168,16 @@ export default function AdminLayout({
             </button>
 
             <Link href="/admin" className="block">
-              {/* PITMSTR Logo - Flame + Wordmark */}
-              <div className="flex items-center gap-3 mb-4">
-                <div className="relative h-11 w-11 flex-shrink-0">
-                  <Image
-                    src="/images/pitmstr-flame.png"
-                    alt="PITMSTR"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <div className="relative h-7 flex-1">
-                  <Image
-                    src="/images/pitmstr-wordmark.png"
-                    alt="PITMSTR"
-                    fill
-                    className="object-contain object-left"
-                    priority
-                  />
-                </div>
+              {/* PITMSTR Logo */}
+              <div className="mb-4">
+                <Image
+                  src="/pitmstr-logo-text-white.png"
+                  alt="PITMSTR"
+                  width={200}
+                  height={40}
+                  className="h-8 w-auto"
+                  priority
+                />
               </div>
 
               {/* Powered by NHSBBQA */}

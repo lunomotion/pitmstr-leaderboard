@@ -193,22 +193,16 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1a1a1a]/40" />
 
         <div className="relative max-w-7xl mx-auto text-center">
-          {/* PITMSTR Logo + Wordmark */}
+          {/* PITMSTR Logo */}
           <div className="flex flex-col items-center mb-6">
             <Image
-              src="/images/pitmstr-flame-nobg.png"
-              alt="PITMSTR Logo"
-              width={100}
-              height={125}
-              className="h-24 md:h-32 w-auto"
+              src="/pitmstr-logo-text-white.png"
+              alt="PITMSTR"
+              width={400}
+              height={80}
+              className="h-16 md:h-20 w-auto"
               priority
             />
-            <h1
-              className="text-4xl md:text-5xl font-bold italic text-white tracking-tight -mt-1"
-              style={{ fontFamily: "var(--font-oswald)" }}
-            >
-              PITMSTR
-            </h1>
           </div>
 
           {/* Tagline */}
@@ -409,18 +403,12 @@ export default function Home() {
             {/* Footer Logo */}
             <div className="flex flex-col items-center">
               <Image
-                src="/images/pitmstr-flame-nobg.png"
+                src="/pitmstr-logo-text-white.png"
                 alt="PITMSTR"
-                width={60}
-                height={75}
-                className="h-14 w-auto"
+                width={200}
+                height={40}
+                className="h-10 w-auto"
               />
-              <span
-                className="text-2xl font-bold italic text-white tracking-tight -mt-0.5"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                PITMSTR
-              </span>
             </div>
             <p
               className="text-sm text-white/80 text-center font-semibold tracking-wider"
