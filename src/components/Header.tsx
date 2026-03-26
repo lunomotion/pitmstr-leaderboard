@@ -32,9 +32,9 @@ export default function Header() {
               <Image
                 src="/pitmstr-logo-text-white.png"
                 alt="PITMSTR"
-                width={140}
-                height={28}
-                className="h-6 w-auto"
+                width={180}
+                height={36}
+                className="h-9 w-auto"
                 priority
               />
             </Link>
