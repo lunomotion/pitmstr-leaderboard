@@ -303,7 +303,7 @@ export default function Home() {
           <div
             className="flex gap-5"
             style={{
-              animation: 'carousel-scroll 35s linear infinite',
+              animation: 'carousel-scroll 55s linear infinite',
               width: 'max-content',
             }}
           >
