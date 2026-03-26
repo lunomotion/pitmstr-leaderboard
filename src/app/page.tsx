@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import Header from "@/components/Header";
 import EventCard from "@/components/EventCard";
 import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
-import { Flame, Calendar, Trophy, Users, Loader2, MapPin, School } from "lucide-react";
+import { Flame, Calendar, Trophy, Users, Loader2, MapPin, School, ArrowRight, ChevronRight, Star } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
 
 // Sample events for display when no Airtable data
@@ -15,7 +16,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_1",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Texas State Championship",
-    date: new Date().toISOString().split('T')[0], // Today - LIVE
+    date: new Date().toISOString().split('T')[0],
     location: "Fort Worth, TX",
     city: "Fort Worth",
     state: "TX",
@@ -29,7 +30,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_1b",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "San Antonio Smoke Classic",
-    date: new Date().toISOString().split('T')[0], // Today - LIVE
+    date: new Date().toISOString().split('T')[0],
     location: "San Antonio, TX",
     city: "San Antonio",
     state: "TX",
@@ -43,7 +44,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_2",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Oklahoma Smoke Showdown",
-    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Next week
+    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: "Oklahoma City, OK",
     city: "Oklahoma City",
     state: "OK",
@@ -57,7 +58,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_3",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Kansas City BBQ Classic",
-    date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 2 weeks
+    date: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: "Kansas City, MO",
     city: "Kansas City",
     state: "MO",
@@ -71,7 +72,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_4",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Georgia Peach Pit Masters",
-    date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 3 weeks
+    date: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: "Atlanta, GA",
     city: "Atlanta",
     state: "GA",
@@ -85,7 +86,7 @@ const SAMPLE_EVENTS: Event[] = [
     id: "sample_5",
     createdTime: "2025-01-01T00:00:00.000Z",
     name: "Lone Star Smoke Show",
-    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Last week
+    date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     location: "Austin, TX",
     city: "Austin",
     state: "TX",
@@ -94,6 +95,45 @@ const SAMPLE_EVENTS: Event[] = [
     description: "Austin's annual celebration of high school BBQ talent, completed with record attendance.",
     registeredTeams: 40,
     categories: ["Brisket", "Ribs", "Chicken"],
+  },
+];
+
+// Carousel cards
+const CAROUSEL_CARDS = [
+  {
+    image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&h=500&fit=crop",
+    category: "STATE CHAMPIONSHIP",
+    title: "Texas State BBQ Championship",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1558030006-450675393462?w=400&h=500&fit=crop",
+    category: "TEAM SPOTLIGHT",
+    title: "Team Ember - Grand Champions",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&h=500&fit=crop",
+    category: "INVITATIONAL",
+    title: "Louisiana Invitational Cook-Off",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&h=500&fit=crop",
+    category: "REGISTRATION OPEN",
+    title: "Register Your School Today",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=500&fit=crop",
+    category: "NATIONAL EVENT",
+    title: "THE SLAB: National Championship",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1606755456206-b25206cde27e?w=400&h=500&fit=crop",
+    category: "FREE GUIDE",
+    title: "How to Start a School BBQ Program",
+  },
+  {
+    image: "https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=400&h=500&fit=crop",
+    category: "COMMUNITY",
+    title: "400+ Teams Across 14 States",
   },
 ];
 
@@ -113,27 +153,20 @@ export default function Home() {
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
   const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
 
-  // Fetch events and stats from API
   useEffect(() => {
     async function fetchData() {
       try {
         setIsLoading(true);
         setError(null);
-
-        // Fetch events
         const eventsResponse = await fetch("/api/events");
         const eventsData = await eventsResponse.json();
-
         if (eventsData.success && eventsData.data && eventsData.data.length > 0) {
           setEvents(eventsData.data);
         } else {
           setEvents(SAMPLE_EVENTS);
         }
-
-        // Fetch stats
         const statsResponse = await fetch("/api/stats");
         const statsData = await statsResponse.json();
-
         if (statsData.success && statsData.data) {
           setStats(statsData.data);
         }
@@ -144,14 +177,11 @@ export default function Home() {
         setIsLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
-  // Filter events
   const filteredEvents = useMemo(() => {
     return events.filter((event) => {
-      // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const matchesSearch =
@@ -160,22 +190,12 @@ export default function Home() {
           event.state.toLowerCase().includes(query);
         if (!matchesSearch) return false;
       }
-
-      // Division filter
-      if (selectedDivision !== "all" && event.division !== selectedDivision) {
-        return false;
-      }
-
-      // Status filter
-      if (selectedStatus !== "all" && event.status !== selectedStatus) {
-        return false;
-      }
-
+      if (selectedDivision !== "all" && event.division !== selectedDivision) return false;
+      if (selectedStatus !== "all" && event.status !== selectedStatus) return false;
       return true;
     });
   }, [events, searchQuery, selectedDivision, selectedStatus]);
 
-  // Separate live events
   const liveEvents = filteredEvents.filter((e) => e.status === "live");
   const otherEvents = filteredEvents.filter((e) => e.status !== "live");
 
@@ -183,118 +203,194 @@ export default function Home() {
     <div className="min-h-screen bg-light-grey">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative text-white py-6 md:py-10 px-4 overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 30%, #1f1f1f 60%, #252525 100%)' }}>
-        {/* Subtle turtle-shell / hexagonal pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.07]" style={{
+      {/* ===== NEW HERO SECTION ===== */}
+      <section className="relative text-white overflow-hidden" style={{ background: 'linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 30%, #1f1f1f 60%, #252525 100%)' }}>
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.05]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.9v12.7l10.99 6.34 11-6.35V17.9l-11-6.34L3 17.9zM0 15l12.98-7.5V0h-2v6.35L0 12.69v2.3zm0 18.5L12.98 41v8h-2v-6.85L0 35.81v-2.3zM15 0v7.5L27.99 15H28v-2.31h-.01L17 6.35V0h-2zm0 49v-8l12.99-7.5H28v2.31h-.01L17 42.15V49h-2z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }} />
-        {/* Bottom fade to page background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#1a1a1a]/40" />
 
-        <div className="relative max-w-7xl mx-auto text-center">
-          {/* PITMSTR Logo */}
-          <div className="flex flex-col items-center mb-6">
+        {/* Ambient glow */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] opacity-20" style={{
+          background: 'radial-gradient(ellipse, rgba(198, 40, 40, 0.6) 0%, transparent 70%)',
+        }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 md:pt-20 pb-8">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
             <Image
               src="/pitmstr-logo-text-white.png"
               alt="PITMSTR"
-              width={400}
-              height={80}
-              className="h-16 md:h-20 w-auto"
+              width={320}
+              height={64}
+              className="h-12 md:h-16 w-auto"
               priority
             />
           </div>
 
-          {/* Tagline */}
-          <p
-            className="text-3xl md:text-5xl text-bbq-red font-bold mb-3"
-            style={{ fontFamily: "var(--font-permanent-marker)" }}
+          {/* Headline */}
+          <h1
+            className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6"
+            style={{ fontFamily: "var(--font-oswald)" }}
           >
-            WHERE DREAMS IGNITE!
-          </p>
-          <p className="text-white/70 max-w-2xl mx-auto mb-8 text-sm md:text-base">
-            Real-time BBQ competition leaderboard for the National High School
-            BBQ Association. Track teams, scores, and rankings across events
-            nationwide.
+            <span className="text-white">America&apos;s </span>
+            <span className="text-bbq-red">CTE Food Sport</span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-center text-base sm:text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+            The all-in-one competition platform for high school and middle school BBQ programs.
+            Real-time scoring, team management, and event operations - built for educators, loved by students.
           </p>
 
-          {/* Quick stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 max-w-3xl mx-auto">
-            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-bbq-red rounded-full">
-                <Calendar className="w-6 h-6 text-white" />
-              </div>
-              <p
-                className="text-3xl md:text-4xl font-bold text-smoke-black"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                {stats.events > 0 ? stats.events : events.length}
-              </p>
-              <p className="text-xs md:text-sm text-medium-grey mt-1">Events</p>
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <Link
+              href="/sign-up"
+              className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-lg font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/25"
+              style={{ fontFamily: "var(--font-oswald)" }}
+            >
+              Register Your School
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="/leaderboard"
+              className="flex items-center gap-2 px-8 py-4 border border-white/20 text-white rounded-full text-lg font-semibold hover:bg-white/10 transition-all"
+              style={{ fontFamily: "var(--font-oswald)" }}
+            >
+              See How It Works
+              <ChevronRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+          {/* Social Proof */}
+          <div className="flex items-center justify-center gap-3 mb-12">
+            <div className="flex -space-x-2">
+              {[
+                "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
+                "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
+                "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face",
+                "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&h=80&fit=crop&crop=face",
+              ].map((src, i) => (
+                <img
+                  key={i}
+                  src={src}
+                  alt=""
+                  className="w-9 h-9 rounded-full border-2 border-smoke-black object-cover"
+                />
+              ))}
             </div>
-            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-americana-blue rounded-full">
-                <Users className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-1.5">
+              <div className="flex gap-0.5">
+                {[1,2,3,4,5].map((i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-gold text-gold" />
+                ))}
               </div>
-              <p
-                className="text-3xl md:text-4xl font-bold text-smoke-black"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                {stats.teams > 0 ? stats.teams : "-"}
-              </p>
-              <p className="text-xs md:text-sm text-medium-grey mt-1">Teams</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-brisket-brown rounded-full">
-                <School className="w-6 h-6 text-white" />
-              </div>
-              <p
-                className="text-3xl md:text-4xl font-bold text-smoke-black"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                {stats.schools > 0 ? stats.schools : "-"}
-              </p>
-              <p className="text-xs md:text-sm text-medium-grey mt-1">Schools</p>
-            </div>
-            <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-gold rounded-full">
-                <MapPin className="w-6 h-6 text-white" />
-              </div>
-              <p
-                className="text-3xl md:text-4xl font-bold text-smoke-black"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                {stats.states > 0 ? stats.states : "-"}
-              </p>
-              <p className="text-xs md:text-sm text-medium-grey mt-1">States</p>
+              <span className="text-sm text-white/60 font-medium">
+                400+ teams across 14 states
+              </span>
             </div>
           </div>
 
-          {/* Secondary tagline */}
+          {/* Stats Bar */}
+          <div className="flex flex-wrap justify-center gap-6 md:gap-12 mb-12">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 bg-bbq-red/20 rounded-full">
+                <MapPin className="w-5 h-5 text-bbq-red" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>14</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">States</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 bg-americana-blue/20 rounded-full">
+                <Users className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>400+</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">Teams</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 bg-brisket-brown/20 rounded-full">
+                <School className="w-5 h-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>200+</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">Schools</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 bg-gold/20 rounded-full">
+                <Trophy className="w-5 h-5 text-gold" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: "var(--font-oswald)" }}>50+</p>
+                <p className="text-xs text-white/50 uppercase tracking-wider">Events</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Tagline */}
           <p
-            className="mt-8 text-lg md:text-xl text-white/90 italic drop-shadow-md"
+            className="text-center text-lg md:text-xl text-white/80 italic drop-shadow-md mb-4"
             style={{ fontFamily: "var(--font-permanent-marker)" }}
           >
             &ldquo;COME EAT OUR HOMEWORK!&rdquo;
           </p>
         </div>
+
+        {/* ===== IMAGE CAROUSEL ===== */}
+        <style>{`
+          @keyframes carousel-scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+        `}</style>
+        <div className="relative w-full overflow-hidden pb-8">
+          {/* Edge fades */}
+          <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #1a1a1a 0%, transparent 100%)' }} />
+          <div className="absolute right-0 top-0 bottom-0 w-24 md:w-40 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #1a1a1a 0%, transparent 100%)' }} />
+
+          {/* Scrolling track */}
+          <div
+            className="flex gap-5"
+            style={{
+              animation: 'carousel-scroll 35s linear infinite',
+              width: 'max-content',
+            }}
+          >
+            {[...CAROUSEL_CARDS, ...CAROUSEL_CARDS].map((card, index) => (
+              <div
+                key={index}
+                className="flex-shrink-0 relative overflow-hidden rounded-2xl group cursor-pointer"
+                style={{ width: '300px', height: '400px' }}
+              >
+                <img
+                  src={card.image}
+                  alt={card.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                {/* Gradient overlay */}
+                <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,0.75) 100%)' }} />
+                {/* Text */}
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <span className="text-[11px] font-semibold text-white/70 uppercase tracking-widest">{card.category}</span>
+                  <h3 className="text-lg font-bold text-white mt-1 leading-tight" style={{ fontFamily: "var(--font-oswald)" }}>{card.title}</h3>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* Main Content */}
+      {/* ===== EVENTS SECTION ===== */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Filters */}
         <div className="mb-6 space-y-4">
-          <SearchInput
-            placeholder="Search events, cities, states..."
-            onSearch={setSearchQuery}
-          />
-
+          <SearchInput placeholder="Search events, cities, states..." onSearch={setSearchQuery} />
           <div className="flex flex-wrap gap-4 items-center justify-between">
-            <DivisionFilter
-              selectedDivision={selectedDivision}
-              onDivisionChange={setSelectedDivision}
-            />
-
+            <DivisionFilter selectedDivision={selectedDivision} onDivisionChange={setSelectedDivision} />
             <div className="flex gap-2">
               {(["all", "live", "upcoming", "completed"] as const).map((status) => (
                 <button
@@ -308,16 +404,13 @@ export default function Home() {
                       : "bg-white text-smoke-black border border-neutral-grey/30 hover:border-smoke-black"
                   }`}
                 >
-                  {status === "all"
-                    ? "All"
-                    : status.charAt(0).toUpperCase() + status.slice(1)}
+                  {status === "all" ? "All" : status.charAt(0).toUpperCase() + status.slice(1)}
                 </button>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
             <Loader2 className="w-12 h-12 mx-auto mb-4 text-bbq-red animate-spin" />
@@ -325,70 +418,44 @@ export default function Home() {
           </div>
         )}
 
-        {/* Error State */}
         {error && !isLoading && (
           <div className="text-center py-12 bg-white rounded-xl border border-bbq-red/30">
             <Flame className="w-12 h-12 mx-auto mb-4 text-bbq-red" />
             <p className="text-smoke-black font-semibold">Error loading events</p>
             <p className="text-medium-grey text-sm mt-1">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-bbq-red text-white rounded-lg hover:bg-bbq-red/90 transition-colors"
-            >
+            <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-bbq-red text-white rounded-lg hover:bg-bbq-red/90 transition-colors">
               Retry
             </button>
           </div>
         )}
 
-        {/* Content */}
         {!isLoading && !error && (
           <>
-            {/* Live Events */}
             {liveEvents.length > 0 && (
               <section className="mb-8">
                 <div className="flex items-center gap-2 mb-4">
                   <Flame className="w-5 h-5 text-bbq-red animate-pulse" />
-                  <h2
-                    className="text-xl font-bold text-smoke-black"
-                    style={{ fontFamily: "var(--font-oswald)" }}
-                  >
-                    LIVE NOW
-                  </h2>
+                  <h2 className="text-xl font-bold text-smoke-black" style={{ fontFamily: "var(--font-oswald)" }}>LIVE NOW</h2>
                 </div>
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {liveEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
+                  {liveEvents.map((event) => <EventCard key={event.id} event={event} />)}
                 </div>
               </section>
             )}
 
-            {/* Other Events */}
             <section>
-              <h2
-                className="text-xl font-bold text-smoke-black mb-4"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
-                {selectedStatus === "all"
-                  ? "ALL EVENTS"
-                  : selectedStatus === "live"
-                    ? "LIVE EVENTS"
-                    : selectedStatus.toUpperCase() + " EVENTS"}
+              <h2 className="text-xl font-bold text-smoke-black mb-4" style={{ fontFamily: "var(--font-oswald)" }}>
+                {selectedStatus === "all" ? "ALL EVENTS" : selectedStatus === "live" ? "LIVE EVENTS" : selectedStatus.toUpperCase() + " EVENTS"}
               </h2>
-
               {otherEvents.length > 0 ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {otherEvents.map((event) => (
-                    <EventCard key={event.id} event={event} />
-                  ))}
+                  {otherEvents.map((event) => <EventCard key={event.id} event={event} />)}
                 </div>
               ) : filteredEvents.length === 0 ? (
                 <div className="text-center py-12 bg-white rounded-xl border border-card-border">
                   <Calendar className="w-12 h-12 mx-auto mb-4 text-neutral-grey" />
                   <p className="text-smoke-black font-semibold">No events found</p>
-                  <p className="text-medium-grey text-sm mt-1">
-                    Try adjusting your filters
-                  </p>
+                  <p className="text-medium-grey text-sm mt-1">Try adjusting your filters</p>
                 </div>
               ) : null}
             </section>
@@ -396,9 +463,8 @@ export default function Home() {
         )}
       </main>
 
-      {/* Footer */}
+      {/* ===== FOOTER WITH ANIMATED FLAMES ===== */}
       <footer className="bg-smoke-black text-white px-4 mt-12 relative overflow-hidden">
-        {/* Flame Animation Styles */}
         <style>{`
           @keyframes flicker {
             0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); opacity: 1; }
@@ -439,105 +505,46 @@ export default function Home() {
           }
         `}</style>
 
-        {/* Animated Flames Section */}
         <div className="relative w-full" style={{ height: '80px' }}>
-          {/* Ambient glow */}
-          <div
-            className="absolute bottom-0 left-0 right-0"
-            style={{
-              height: '60px',
-              background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 111, 0, 0.15) 0%, transparent 70%)',
-              animation: 'glow 3s ease-in-out infinite',
-            }}
-          />
-
-          {/* Flame group 1 - left */}
+          <div className="absolute bottom-0 left-0 right-0" style={{ height: '60px', background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 111, 0, 0.15) 0%, transparent 70%)', animation: 'glow 3s ease-in-out infinite' }} />
           <div className="flame-tongue" style={{ left: '5%', width: '30px', height: '50px', background: 'linear-gradient(to top, #C62828, #FF6F00 40%, #FFD600 90%)', animation: 'flicker 1.5s ease-in-out infinite', opacity: 0.7 }} />
           <div className="flame-tongue-inner" style={{ left: '6%', width: '16px', height: '35px', background: 'linear-gradient(to top, #FF8F00, #FFD600 60%, #FFF9C4 95%)', animation: 'flicker2 1.8s ease-in-out infinite', opacity: 0.9 }} />
-
           <div className="flame-tongue" style={{ left: '10%', width: '22px', height: '40px', background: 'linear-gradient(to top, #C62828, #FF6F00 50%, #FFD600 95%)', animation: 'flicker2 2s ease-in-out infinite', opacity: 0.6 }} />
-
           <div className="flame-tongue" style={{ left: '15%', width: '35px', height: '55px', background: 'linear-gradient(to top, #C62828, #FF8F00 35%, #FF6F00 70%, #FFD600 95%)', animation: 'flicker3 1.3s ease-in-out infinite', opacity: 0.8 }} />
           <div className="flame-tongue-inner" style={{ left: '16%', width: '20px', height: '40px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker 1.6s ease-in-out infinite', opacity: 0.85 }} />
-
           <div className="flame-tongue" style={{ left: '21%', width: '18px', height: '32px', background: 'linear-gradient(to top, #C62828, #FF6F00 60%, #FFD600 95%)', animation: 'flicker 2.2s ease-in-out infinite', opacity: 0.55 }} />
-
-          {/* Flame group 2 - center-left */}
           <div className="flame-tongue" style={{ left: '28%', width: '28px', height: '48px', background: 'linear-gradient(to top, #C62828, #FF6F00 45%, #FFD600 90%)', animation: 'flicker2 1.4s ease-in-out infinite', opacity: 0.75 }} />
           <div className="flame-tongue-inner" style={{ left: '29%', width: '14px', height: '32px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 95%)', animation: 'flicker3 1.7s ease-in-out infinite', opacity: 0.9 }} />
-
           <div className="flame-tongue" style={{ left: '34%', width: '24px', height: '42px', background: 'linear-gradient(to top, #C62828, #FF8F00 40%, #FFD600 85%)', animation: 'flicker 1.9s ease-in-out infinite', opacity: 0.65 }} />
-
           <div className="flame-tongue" style={{ left: '39%', width: '32px', height: '58px', background: 'linear-gradient(to top, #C62828, #FF6F00 30%, #FF8F00 60%, #FFD600 90%)', animation: 'flicker3 1.2s ease-in-out infinite', opacity: 0.85 }} />
           <div className="flame-tongue-inner" style={{ left: '40%', width: '18px', height: '42px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker2 1.5s ease-in-out infinite', opacity: 0.9 }} />
-
-          {/* Flame group 3 - center (tallest, logo area) */}
           <div className="flame-tongue" style={{ left: '44%', width: '26px', height: '52px', background: 'linear-gradient(to top, #C62828, #FF6F00 40%, #FFD600 90%)', animation: 'flicker 1.6s ease-in-out infinite', opacity: 0.7 }} />
-
           <div className="flame-tongue" style={{ left: '48%', width: '38px', height: '70px', background: 'linear-gradient(to top, #C62828, #FF6F00 30%, #FF8F00 55%, #FFD600 85%)', animation: 'flicker2 1.1s ease-in-out infinite', opacity: 0.9 }} />
           <div className="flame-tongue-inner" style={{ left: '49.5%', width: '22px', height: '52px', background: 'linear-gradient(to top, #FF8F00, #FFD600 45%, #FFF9C4 85%)', animation: 'flicker3 1.4s ease-in-out infinite', opacity: 0.95 }} />
-
           <div className="flame-tongue" style={{ left: '53%', width: '30px', height: '60px', background: 'linear-gradient(to top, #C62828, #FF8F00 35%, #FF6F00 60%, #FFD600 90%)', animation: 'flicker 1.3s ease-in-out infinite', opacity: 0.8 }} />
           <div className="flame-tongue-inner" style={{ left: '54%', width: '16px', height: '44px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker2 1.7s ease-in-out infinite', opacity: 0.85 }} />
-
-          {/* Flame group 4 - center-right */}
           <div className="flame-tongue" style={{ left: '59%', width: '28px', height: '50px', background: 'linear-gradient(to top, #C62828, #FF6F00 42%, #FFD600 88%)', animation: 'flicker3 1.5s ease-in-out infinite', opacity: 0.75 }} />
           <div className="flame-tongue-inner" style={{ left: '60%', width: '15px', height: '35px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 90%)', animation: 'flicker 1.9s ease-in-out infinite', opacity: 0.85 }} />
-
           <div className="flame-tongue" style={{ left: '65%', width: '22px', height: '38px', background: 'linear-gradient(to top, #C62828, #FF6F00 50%, #FFD600 92%)', animation: 'flicker2 2.1s ease-in-out infinite', opacity: 0.6 }} />
-
           <div className="flame-tongue" style={{ left: '70%', width: '34px', height: '55px', background: 'linear-gradient(to top, #C62828, #FF8F00 32%, #FF6F00 65%, #FFD600 92%)', animation: 'flicker 1.2s ease-in-out infinite', opacity: 0.8 }} />
           <div className="flame-tongue-inner" style={{ left: '71%', width: '20px', height: '40px', background: 'linear-gradient(to top, #FF8F00, #FFD600 48%, #FFF9C4 88%)', animation: 'flicker3 1.6s ease-in-out infinite', opacity: 0.9 }} />
-
-          {/* Flame group 5 - right */}
           <div className="flame-tongue" style={{ left: '77%', width: '26px', height: '45px', background: 'linear-gradient(to top, #C62828, #FF6F00 45%, #FFD600 90%)', animation: 'flicker2 1.4s ease-in-out infinite', opacity: 0.7 }} />
           <div className="flame-tongue-inner" style={{ left: '78%', width: '14px', height: '30px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 90%)', animation: 'flicker 1.8s ease-in-out infinite', opacity: 0.85 }} />
-
           <div className="flame-tongue" style={{ left: '83%', width: '20px', height: '36px', background: 'linear-gradient(to top, #C62828, #FF6F00 55%, #FFD600 95%)', animation: 'flicker3 2s ease-in-out infinite', opacity: 0.55 }} />
-
           <div className="flame-tongue" style={{ left: '88%', width: '30px', height: '48px', background: 'linear-gradient(to top, #C62828, #FF8F00 38%, #FF6F00 68%, #FFD600 92%)', animation: 'flicker 1.3s ease-in-out infinite', opacity: 0.75 }} />
           <div className="flame-tongue-inner" style={{ left: '89%', width: '17px', height: '34px', background: 'linear-gradient(to top, #FF8F00, #FFD600 52%, #FFF9C4 90%)', animation: 'flicker2 1.6s ease-in-out infinite', opacity: 0.9 }} />
-
           <div className="flame-tongue" style={{ left: '94%', width: '24px', height: '42px', background: 'linear-gradient(to top, #C62828, #FF6F00 48%, #FFD600 92%)', animation: 'flicker3 1.7s ease-in-out infinite', opacity: 0.65 }} />
-
-          {/* Ember base glow line */}
-          <div
-            className="absolute bottom-0 left-0 right-0"
-            style={{
-              height: '4px',
-              background: 'linear-gradient(90deg, transparent 0%, #C62828 10%, #FF6F00 30%, #FFD600 50%, #FF6F00 70%, #C62828 90%, transparent 100%)',
-              animation: 'glow 2s ease-in-out infinite',
-              filter: 'blur(2px)',
-            }}
-          />
+          <div className="absolute bottom-0 left-0 right-0" style={{ height: '4px', background: 'linear-gradient(90deg, transparent 0%, #C62828 10%, #FF6F00 30%, #FFD600 50%, #FF6F00 70%, #C62828 90%, transparent 100%)', animation: 'glow 2s ease-in-out infinite', filter: 'blur(2px)' }} />
         </div>
 
-        {/* Footer Content */}
         <div className="relative z-10 py-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col items-center gap-6">
-              {/* Footer Logo - emerging from flames */}
               <div className="flex flex-col items-center -mt-14 relative">
-                <div
-                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-48 h-8 rounded-full"
-                  style={{
-                    background: 'radial-gradient(ellipse, rgba(255, 111, 0, 0.25) 0%, transparent 70%)',
-                    animation: 'glow 2.5s ease-in-out infinite',
-                    filter: 'blur(4px)',
-                  }}
-                />
-                <Image
-                  src="/pitmstr-logo-text-white.png"
-                  alt="PITMSTR"
-                  width={200}
-                  height={40}
-                  className="h-10 w-auto relative z-10 drop-shadow-[0_0_12px_rgba(255,111,0,0.4)]"
-                />
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-48 h-8 rounded-full" style={{ background: 'radial-gradient(ellipse, rgba(255, 111, 0, 0.25) 0%, transparent 70%)', animation: 'glow 2.5s ease-in-out infinite', filter: 'blur(4px)' }} />
+                <Image src="/pitmstr-logo-text-white.png" alt="PITMSTR" width={200} height={40} className="h-10 w-auto relative z-10 drop-shadow-[0_0_12px_rgba(255,111,0,0.4)]" />
               </div>
-              <p
-                className="text-sm text-white/80 text-center font-semibold tracking-wider"
-                style={{ fontFamily: "var(--font-oswald)" }}
-              >
+              <p className="text-sm text-white/80 text-center font-semibold tracking-wider" style={{ fontFamily: "var(--font-oswald)" }}>
                 EDUCATION. BARBECUE. FAMILY.
               </p>
               <p className="text-xs text-white/50">
