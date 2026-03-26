@@ -5,6 +5,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import DivisionBadge from "@/components/DivisionBadge";
 import { Trophy, Loader2, Flame, Calendar, MapPin, ChevronRight } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
@@ -14,6 +15,7 @@ export default function LeaderboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
 
   // Fetch events from API
   useEffect(() => {
@@ -54,9 +56,14 @@ export default function LeaderboardPage() {
         return false;
       }
 
+      // Alphabet filter
+      if (activeLetter && !event.name.toUpperCase().startsWith(activeLetter)) {
+        return false;
+      }
+
       return true;
     });
-  }, [events, searchQuery, selectedDivision]);
+  }, [events, searchQuery, selectedDivision, activeLetter]);
 
   // Separate live and other events
   const liveEvents = filteredEvents.filter((e) => e.status === "live");
@@ -168,6 +175,12 @@ export default function LeaderboardPage() {
               onDivisionChange={setSelectedDivision}
             />
           </div>
+
+          <AlphabetFilter
+            activeLetter={activeLetter}
+            onSelect={setActiveLetter}
+            className="mt-3"
+          />
         </div>
       </section>
 

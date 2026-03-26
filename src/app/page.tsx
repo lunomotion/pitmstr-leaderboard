@@ -397,28 +397,153 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-smoke-black text-white py-10 px-4 mt-12">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col items-center gap-6">
-            {/* Footer Logo */}
-            <div className="flex flex-col items-center">
-              <Image
-                src="/pitmstr-logo-text-white.png"
-                alt="PITMSTR"
-                width={200}
-                height={40}
-                className="h-10 w-auto"
-              />
+      <footer className="bg-smoke-black text-white px-4 mt-12 relative overflow-hidden">
+        {/* Flame Animation Styles */}
+        <style>{`
+          @keyframes flicker {
+            0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); opacity: 1; }
+            25% { transform: scaleY(1.2) scaleX(0.9) translateY(-4px); opacity: 0.9; }
+            50% { transform: scaleY(0.85) scaleX(1.1) translateY(2px); opacity: 1; }
+            75% { transform: scaleY(1.1) scaleX(0.95) translateY(-2px); opacity: 0.85; }
+          }
+          @keyframes flicker2 {
+            0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); opacity: 0.9; }
+            20% { transform: scaleY(0.9) scaleX(1.05) translateY(3px); opacity: 1; }
+            40% { transform: scaleY(1.15) scaleX(0.92) translateY(-5px); opacity: 0.8; }
+            60% { transform: scaleY(0.95) scaleX(1.08) translateY(-1px); opacity: 0.95; }
+            80% { transform: scaleY(1.08) scaleX(0.97) translateY(-3px); opacity: 0.85; }
+          }
+          @keyframes flicker3 {
+            0%, 100% { transform: scaleY(1) translateY(0); opacity: 0.85; }
+            30% { transform: scaleY(1.25) translateY(-6px); opacity: 1; }
+            60% { transform: scaleY(0.8) translateY(1px); opacity: 0.75; }
+            90% { transform: scaleY(1.1) translateY(-3px); opacity: 0.9; }
+          }
+          @keyframes glow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+          }
+          .flame-tongue {
+            position: absolute;
+            bottom: 0;
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(2px);
+            transform-origin: bottom center;
+          }
+          .flame-tongue-inner {
+            position: absolute;
+            bottom: 0;
+            border-radius: 50% 50% 20% 20%;
+            filter: blur(1px);
+            transform-origin: bottom center;
+          }
+        `}</style>
+
+        {/* Animated Flames Section */}
+        <div className="relative w-full" style={{ height: '80px' }}>
+          {/* Ambient glow */}
+          <div
+            className="absolute bottom-0 left-0 right-0"
+            style={{
+              height: '60px',
+              background: 'radial-gradient(ellipse at 50% 100%, rgba(255, 111, 0, 0.15) 0%, transparent 70%)',
+              animation: 'glow 3s ease-in-out infinite',
+            }}
+          />
+
+          {/* Flame group 1 - left */}
+          <div className="flame-tongue" style={{ left: '5%', width: '30px', height: '50px', background: 'linear-gradient(to top, #C62828, #FF6F00 40%, #FFD600 90%)', animation: 'flicker 1.5s ease-in-out infinite', opacity: 0.7 }} />
+          <div className="flame-tongue-inner" style={{ left: '6%', width: '16px', height: '35px', background: 'linear-gradient(to top, #FF8F00, #FFD600 60%, #FFF9C4 95%)', animation: 'flicker2 1.8s ease-in-out infinite', opacity: 0.9 }} />
+
+          <div className="flame-tongue" style={{ left: '10%', width: '22px', height: '40px', background: 'linear-gradient(to top, #C62828, #FF6F00 50%, #FFD600 95%)', animation: 'flicker2 2s ease-in-out infinite', opacity: 0.6 }} />
+
+          <div className="flame-tongue" style={{ left: '15%', width: '35px', height: '55px', background: 'linear-gradient(to top, #C62828, #FF8F00 35%, #FF6F00 70%, #FFD600 95%)', animation: 'flicker3 1.3s ease-in-out infinite', opacity: 0.8 }} />
+          <div className="flame-tongue-inner" style={{ left: '16%', width: '20px', height: '40px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker 1.6s ease-in-out infinite', opacity: 0.85 }} />
+
+          <div className="flame-tongue" style={{ left: '21%', width: '18px', height: '32px', background: 'linear-gradient(to top, #C62828, #FF6F00 60%, #FFD600 95%)', animation: 'flicker 2.2s ease-in-out infinite', opacity: 0.55 }} />
+
+          {/* Flame group 2 - center-left */}
+          <div className="flame-tongue" style={{ left: '28%', width: '28px', height: '48px', background: 'linear-gradient(to top, #C62828, #FF6F00 45%, #FFD600 90%)', animation: 'flicker2 1.4s ease-in-out infinite', opacity: 0.75 }} />
+          <div className="flame-tongue-inner" style={{ left: '29%', width: '14px', height: '32px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 95%)', animation: 'flicker3 1.7s ease-in-out infinite', opacity: 0.9 }} />
+
+          <div className="flame-tongue" style={{ left: '34%', width: '24px', height: '42px', background: 'linear-gradient(to top, #C62828, #FF8F00 40%, #FFD600 85%)', animation: 'flicker 1.9s ease-in-out infinite', opacity: 0.65 }} />
+
+          <div className="flame-tongue" style={{ left: '39%', width: '32px', height: '58px', background: 'linear-gradient(to top, #C62828, #FF6F00 30%, #FF8F00 60%, #FFD600 90%)', animation: 'flicker3 1.2s ease-in-out infinite', opacity: 0.85 }} />
+          <div className="flame-tongue-inner" style={{ left: '40%', width: '18px', height: '42px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker2 1.5s ease-in-out infinite', opacity: 0.9 }} />
+
+          {/* Flame group 3 - center (tallest, logo area) */}
+          <div className="flame-tongue" style={{ left: '44%', width: '26px', height: '52px', background: 'linear-gradient(to top, #C62828, #FF6F00 40%, #FFD600 90%)', animation: 'flicker 1.6s ease-in-out infinite', opacity: 0.7 }} />
+
+          <div className="flame-tongue" style={{ left: '48%', width: '38px', height: '70px', background: 'linear-gradient(to top, #C62828, #FF6F00 30%, #FF8F00 55%, #FFD600 85%)', animation: 'flicker2 1.1s ease-in-out infinite', opacity: 0.9 }} />
+          <div className="flame-tongue-inner" style={{ left: '49.5%', width: '22px', height: '52px', background: 'linear-gradient(to top, #FF8F00, #FFD600 45%, #FFF9C4 85%)', animation: 'flicker3 1.4s ease-in-out infinite', opacity: 0.95 }} />
+
+          <div className="flame-tongue" style={{ left: '53%', width: '30px', height: '60px', background: 'linear-gradient(to top, #C62828, #FF8F00 35%, #FF6F00 60%, #FFD600 90%)', animation: 'flicker 1.3s ease-in-out infinite', opacity: 0.8 }} />
+          <div className="flame-tongue-inner" style={{ left: '54%', width: '16px', height: '44px', background: 'linear-gradient(to top, #FF8F00, #FFD600 50%, #FFF9C4 90%)', animation: 'flicker2 1.7s ease-in-out infinite', opacity: 0.85 }} />
+
+          {/* Flame group 4 - center-right */}
+          <div className="flame-tongue" style={{ left: '59%', width: '28px', height: '50px', background: 'linear-gradient(to top, #C62828, #FF6F00 42%, #FFD600 88%)', animation: 'flicker3 1.5s ease-in-out infinite', opacity: 0.75 }} />
+          <div className="flame-tongue-inner" style={{ left: '60%', width: '15px', height: '35px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 90%)', animation: 'flicker 1.9s ease-in-out infinite', opacity: 0.85 }} />
+
+          <div className="flame-tongue" style={{ left: '65%', width: '22px', height: '38px', background: 'linear-gradient(to top, #C62828, #FF6F00 50%, #FFD600 92%)', animation: 'flicker2 2.1s ease-in-out infinite', opacity: 0.6 }} />
+
+          <div className="flame-tongue" style={{ left: '70%', width: '34px', height: '55px', background: 'linear-gradient(to top, #C62828, #FF8F00 32%, #FF6F00 65%, #FFD600 92%)', animation: 'flicker 1.2s ease-in-out infinite', opacity: 0.8 }} />
+          <div className="flame-tongue-inner" style={{ left: '71%', width: '20px', height: '40px', background: 'linear-gradient(to top, #FF8F00, #FFD600 48%, #FFF9C4 88%)', animation: 'flicker3 1.6s ease-in-out infinite', opacity: 0.9 }} />
+
+          {/* Flame group 5 - right */}
+          <div className="flame-tongue" style={{ left: '77%', width: '26px', height: '45px', background: 'linear-gradient(to top, #C62828, #FF6F00 45%, #FFD600 90%)', animation: 'flicker2 1.4s ease-in-out infinite', opacity: 0.7 }} />
+          <div className="flame-tongue-inner" style={{ left: '78%', width: '14px', height: '30px', background: 'linear-gradient(to top, #FF8F00, #FFD600 55%, #FFF9C4 90%)', animation: 'flicker 1.8s ease-in-out infinite', opacity: 0.85 }} />
+
+          <div className="flame-tongue" style={{ left: '83%', width: '20px', height: '36px', background: 'linear-gradient(to top, #C62828, #FF6F00 55%, #FFD600 95%)', animation: 'flicker3 2s ease-in-out infinite', opacity: 0.55 }} />
+
+          <div className="flame-tongue" style={{ left: '88%', width: '30px', height: '48px', background: 'linear-gradient(to top, #C62828, #FF8F00 38%, #FF6F00 68%, #FFD600 92%)', animation: 'flicker 1.3s ease-in-out infinite', opacity: 0.75 }} />
+          <div className="flame-tongue-inner" style={{ left: '89%', width: '17px', height: '34px', background: 'linear-gradient(to top, #FF8F00, #FFD600 52%, #FFF9C4 90%)', animation: 'flicker2 1.6s ease-in-out infinite', opacity: 0.9 }} />
+
+          <div className="flame-tongue" style={{ left: '94%', width: '24px', height: '42px', background: 'linear-gradient(to top, #C62828, #FF6F00 48%, #FFD600 92%)', animation: 'flicker3 1.7s ease-in-out infinite', opacity: 0.65 }} />
+
+          {/* Ember base glow line */}
+          <div
+            className="absolute bottom-0 left-0 right-0"
+            style={{
+              height: '4px',
+              background: 'linear-gradient(90deg, transparent 0%, #C62828 10%, #FF6F00 30%, #FFD600 50%, #FF6F00 70%, #C62828 90%, transparent 100%)',
+              animation: 'glow 2s ease-in-out infinite',
+              filter: 'blur(2px)',
+            }}
+          />
+        </div>
+
+        {/* Footer Content */}
+        <div className="relative z-10 py-10">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col items-center gap-6">
+              {/* Footer Logo - emerging from flames */}
+              <div className="flex flex-col items-center -mt-14 relative">
+                <div
+                  className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-48 h-8 rounded-full"
+                  style={{
+                    background: 'radial-gradient(ellipse, rgba(255, 111, 0, 0.25) 0%, transparent 70%)',
+                    animation: 'glow 2.5s ease-in-out infinite',
+                    filter: 'blur(4px)',
+                  }}
+                />
+                <Image
+                  src="/pitmstr-logo-text-white.png"
+                  alt="PITMSTR"
+                  width={200}
+                  height={40}
+                  className="h-10 w-auto relative z-10 drop-shadow-[0_0_12px_rgba(255,111,0,0.4)]"
+                />
+              </div>
+              <p
+                className="text-sm text-white/80 text-center font-semibold tracking-wider"
+                style={{ fontFamily: "var(--font-oswald)" }}
+              >
+                EDUCATION. BARBECUE. FAMILY.
+              </p>
+              <p className="text-xs text-white/50">
+                &copy; {new Date().getFullYear()} NHSBBQA&reg;. All rights reserved.
+              </p>
             </div>
-            <p
-              className="text-sm text-white/80 text-center font-semibold tracking-wider"
-              style={{ fontFamily: "var(--font-oswald)" }}
-            >
-              EDUCATION. BARBECUE. FAMILY.
-            </p>
-            <p className="text-xs text-white/50">
-              &copy; {new Date().getFullYear()} NHSBBQA&reg;. All rights reserved.
-            </p>
           </div>
         </div>
       </footer>

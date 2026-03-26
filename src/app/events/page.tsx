@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import EventCard from "@/components/EventCard";
 import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import { Calendar, Loader2, Filter, Plus, X, Trash2 } from "lucide-react";
 import type { Event, Division, EventStatus } from "@/lib/types";
 import { formatStateHSBBQ } from "@/lib/format";
@@ -16,6 +17,7 @@ export default function EventsPage() {
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
   const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
   const [selectedState, setSelectedState] = useState<string>("all");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -131,9 +133,14 @@ export default function EventsPage() {
         return false;
       }
 
+      // Alphabet filter
+      if (activeLetter && !event.name.toUpperCase().startsWith(activeLetter)) {
+        return false;
+      }
+
       return true;
     });
-  }, [events, searchQuery, selectedDivision, selectedStatus, selectedState]);
+  }, [events, searchQuery, selectedDivision, selectedStatus, selectedState, activeLetter]);
 
   // Group events by status
   const liveEvents = filteredEvents.filter((e) => e.status === "live");
@@ -221,6 +228,11 @@ export default function EventsPage() {
                 ))}
               </div>
             </div>
+
+            <AlphabetFilter
+              activeLetter={activeLetter}
+              onSelect={setActiveLetter}
+            />
           </div>
         </div>
       </section>

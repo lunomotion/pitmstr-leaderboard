@@ -5,8 +5,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import SearchInput from "@/components/SearchInput";
 import DivisionFilter from "@/components/DivisionFilter";
+import AlphabetFilter from "@/components/AlphabetFilter";
 import DivisionBadge from "@/components/DivisionBadge";
-import { Users, Loader2, Filter, ChevronRight, School, MapPin, Plus, X, Trash2 } from "lucide-react";
+import { Users, Loader2, Filter, ChevronRight, School, MapPin, Plus, X, Trash2, Flame, Eye } from "lucide-react";
 import type { Team, Division } from "@/lib/types";
 import { formatStateHSBBQ } from "@/lib/format";
 
@@ -16,6 +17,7 @@ export default function TeamsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<Division | "all">("all");
   const [selectedState, setSelectedState] = useState<string>("all");
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -123,9 +125,14 @@ export default function TeamsPage() {
         return false;
       }
 
+      // Alphabet filter
+      if (activeLetter && !team.name.toUpperCase().startsWith(activeLetter)) {
+        return false;
+      }
+
       return true;
     });
-  }, [teams, searchQuery, selectedDivision, selectedState]);
+  }, [teams, searchQuery, selectedDivision, selectedState, activeLetter]);
 
   // Group teams by state
   const teamsByState = useMemo(() => {
@@ -198,12 +205,54 @@ export default function TeamsPage() {
                 </select>
               </div>
             </div>
+
+            <AlphabetFilter
+              activeLetter={activeLetter}
+              onSelect={setActiveLetter}
+            />
           </div>
         </div>
       </section>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        {/* Pinned Demo Team */}
+        <section className="mb-8">
+          <Link
+            href="/teams/ember"
+            className="block bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200 p-4 hover:shadow-lg hover:-translate-y-1 transition-all group"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-5 h-5 text-amber-600" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <h3
+                      className="font-bold text-smoke-black text-lg truncate group-hover:text-bbq-red transition-colors"
+                      style={{ fontFamily: "var(--font-oswald)" }}
+                    >
+                      Team Ember
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 text-[10px] font-bold uppercase tracking-wider flex-shrink-0">
+                      <Eye className="w-3 h-3" />
+                      Demo Team
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-sm text-medium-grey">
+                    <School className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">Pitmaster Academy</span>
+                    <span className="text-neutral-grey">·</span>
+                    <span>TX</span>
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-neutral-grey group-hover:text-bbq-red transition-colors flex-shrink-0" />
+            </div>
+          </Link>
+        </section>
+
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">

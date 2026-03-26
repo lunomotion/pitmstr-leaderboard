@@ -29,6 +29,7 @@ import {
   ExternalLink,
   Settings,
   UserCog,
+  Radio,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ const navItems = [
   { href: "/admin/volunteers", label: "Volunteers", icon: HandHeart },
   { href: "/admin/sponsors", label: "Sponsors", icon: Award },
   { href: "/admin/reports", label: "Reports & PDFs", icon: Printer },
+  { href: "/admin/lfhq-radio", label: "LFHQ Radio", icon: Radio },
 ];
 
 const dataItems = [
