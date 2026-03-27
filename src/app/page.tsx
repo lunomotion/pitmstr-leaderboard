@@ -334,24 +334,26 @@ export default function Home() {
 
       {/* ===== NHSBBQA BANNER ===== */}
       <section className="bg-white py-12 md:py-16 border-b border-neutral-grey/20">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
             <Image
               src="/images/nhsbbqa-logo.png"
               alt="NHSBBQA"
-              width={240}
-              height={240}
-              className="h-36 md:h-48 w-auto flex-shrink-0"
+              width={280}
+              height={280}
+              className="h-40 md:h-52 w-auto flex-shrink-0"
             />
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center text-center">
               <h2
-                className="text-center text-3xl sm:text-4xl md:text-5xl font-bold tracking-wider leading-tight"
+                className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-wider leading-tight"
                 style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
               >
-                NATIONAL HIGH SCHOOL BBQ ASSOCIATION
+                NATIONAL HIGH SCHOOL
+                <br />
+                BBQ ASSOCIATION
               </h2>
               <p
-                className="text-center text-2xl sm:text-3xl md:text-4xl font-bold tracking-widest mt-2"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-widest mt-2"
                 style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
               >
                 (NHSBBQA)
@@ -362,7 +364,7 @@ export default function Home() {
               alt="PITMSTR"
               width={240}
               height={240}
-              className="h-36 md:h-48 w-auto flex-shrink-0"
+              className="h-36 md:h-48 w-auto flex-shrink-0 md:ml-4"
             />
           </div>
         </div>
