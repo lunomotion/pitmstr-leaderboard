@@ -13,7 +13,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-smoke-black/95 backdrop-blur-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-14">
+        <div className="flex items-center justify-between h-20">
           {/* Logo + Mobile menu button - left side */}
           <div className="flex items-center gap-3">
             <button
@@ -32,9 +32,9 @@ export default function Header() {
               <Image
                 src="/pitmstr-logo-text-white.png"
                 alt="PITMSTR"
-                width={240}
-                height={48}
-                className="h-12 w-auto"
+                width={320}
+                height={64}
+                className="h-14 md:h-16 w-auto"
                 priority
               />
             </Link>

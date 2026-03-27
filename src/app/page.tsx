@@ -333,28 +333,36 @@ export default function Home() {
       </section>
 
       {/* ===== NHSBBQA BANNER ===== */}
-      <section className="bg-smoke-black py-8">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex items-center justify-center gap-6 md:gap-10">
+      <section className="bg-white py-10 border-b border-neutral-grey/20">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
             <Image
               src="/images/nhsbbqa-logo.png"
               alt="NHSBBQA"
-              width={80}
-              height={80}
-              className="h-16 w-auto md:h-20 flex-shrink-0"
+              width={160}
+              height={160}
+              className="h-28 md:h-36 w-auto flex-shrink-0"
             />
-            <h2
-              className="text-center text-lg sm:text-xl md:text-2xl font-bold tracking-wider"
-              style={{ fontFamily: "var(--font-oswald)", color: "#2196F3" }}
-            >
-              NATIONAL HIGH SCHOOL BBQ ASSOCIATION (NHSBBQA)
-            </h2>
+            <div className="flex flex-col items-center">
+              <h2
+                className="text-center text-2xl sm:text-3xl md:text-4xl font-bold tracking-wider leading-tight"
+                style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
+              >
+                NATIONAL HIGH SCHOOL BBQ ASSOCIATION
+              </h2>
+              <p
+                className="text-center text-xl sm:text-2xl md:text-3xl font-bold tracking-widest mt-1"
+                style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
+              >
+                (NHSBBQA)
+              </p>
+            </div>
             <Image
-              src="/pitmstr-logo-text-white.png"
+              src="/pitmstr-logo.png"
               alt="PITMSTR"
-              width={120}
-              height={40}
-              className="h-10 w-auto md:h-12 flex-shrink-0"
+              width={160}
+              height={160}
+              className="h-28 md:h-36 w-auto flex-shrink-0"
             />
           </div>
         </div>
