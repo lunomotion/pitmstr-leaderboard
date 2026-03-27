@@ -205,10 +205,10 @@ export default function Home() {
 
       {/* ===== HERO SECTION ===== */}
       <section className="relative overflow-hidden bg-white">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-12 md:pt-20 pb-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-16 md:pt-28 pb-12">
           {/* Headline */}
           <h1
-            className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-6 text-smoke-black"
+            className="text-center text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1] mb-8 text-smoke-black"
             style={{ fontFamily: "var(--font-oswald)" }}
           >
             America&apos;s CTE Food Sport
@@ -216,20 +216,20 @@ export default function Home() {
 
           {/* WHERE DREAMS IGNITE tagline */}
           <p
-            className="text-center text-2xl md:text-3xl text-bbq-red mb-6"
+            className="text-center text-2xl md:text-3xl text-bbq-red mb-10"
             style={{ fontFamily: "var(--font-permanent-marker)" }}
           >
             WHERE DREAMS IGNITE!
           </p>
 
           {/* Subtitle */}
-          <p className="text-center text-base sm:text-lg md:text-xl text-medium-grey max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-center text-base sm:text-lg md:text-xl text-medium-grey max-w-2xl mx-auto mb-14 leading-relaxed">
             The all-in-one competition platform for High School (HSBBQ), Middle School (MSBBQ), and Collegiate (CBBQ) teams.
             Real-time scoring, team management, and event operations — built for educators, loved by students.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
             <Link
               href="/sign-up"
               className="flex items-center gap-2 px-8 py-4 bg-bbq-red text-white rounded-full text-xl font-semibold hover:bg-bbq-red/90 transition-all hover:scale-105 shadow-lg shadow-bbq-red/20"
@@ -249,7 +249,7 @@ export default function Home() {
           </div>
 
           {/* Social Proof */}
-          <div className="flex items-center justify-center gap-3 mb-12">
+          <div className="flex items-center justify-center gap-3 mb-16">
             <div className="flex -space-x-2">
               {[
                 "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face",
@@ -334,8 +334,8 @@ export default function Home() {
 
       {/* ===== NHSBBQA BANNER ===== */}
       <section className="bg-white py-12 md:py-16 border-b border-neutral-grey/20">
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-10">
             <Image
               src="/images/nhsbbqa-logo.png"
               alt="NHSBBQA"
@@ -343,17 +343,21 @@ export default function Home() {
               height={280}
               className="h-40 md:h-52 w-auto flex-shrink-0"
             />
-            <div className="flex flex-col items-center text-center">
+            <div className="flex flex-col items-center text-center flex-1 min-w-0">
               <h2
-                className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-wider leading-tight"
-                style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
+                className="font-bold tracking-wider whitespace-nowrap"
+                style={{ fontFamily: "var(--font-oswald)", color: "#1565C0", fontSize: 'clamp(1.5rem, 3.2vw, 2.8rem)', lineHeight: 1.2 }}
               >
                 NATIONAL HIGH SCHOOL
-                <br />
+              </h2>
+              <h2
+                className="font-bold tracking-wider whitespace-nowrap"
+                style={{ fontFamily: "var(--font-oswald)", color: "#1565C0", fontSize: 'clamp(1.5rem, 3.2vw, 2.8rem)', lineHeight: 1.2 }}
+              >
                 BBQ ASSOCIATION
               </h2>
               <p
-                className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-widest mt-2"
+                className="text-xl sm:text-2xl md:text-3xl font-bold tracking-widest mt-2"
                 style={{ fontFamily: "var(--font-oswald)", color: "#1565C0" }}
               >
                 (NHSBBQA)
@@ -364,7 +368,7 @@ export default function Home() {
               alt="PITMSTR"
               width={240}
               height={240}
-              className="h-36 md:h-48 w-auto flex-shrink-0 md:ml-4"
+              className="h-36 md:h-48 w-auto flex-shrink-0"
             />
           </div>
         </div>
