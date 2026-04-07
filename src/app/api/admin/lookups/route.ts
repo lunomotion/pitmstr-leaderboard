@@ -39,6 +39,9 @@ export async function GET(request: NextRequest) {
       const data = records.map((r) => ({
         id: r.id,
         name: (r.get("Division Name") as string) || "",
+        code: (r.get("Code") as string) || "",
+        gradeRange: (r.get("Grade Range") as string) || "",
+        ageRange: (r.get("Age Range") as string) || "",
       }));
       return NextResponse.json({ success: true, data });
     }

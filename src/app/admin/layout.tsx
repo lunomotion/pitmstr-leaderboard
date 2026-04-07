@@ -30,6 +30,7 @@ import {
   Settings,
   UserCog,
   Radio,
+  Receipt,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -43,6 +44,7 @@ const navItems = [
   { href: "/admin/judges", label: "Judges", icon: ClipboardList },
   { href: "/admin/volunteers", label: "Volunteers", icon: HandHeart },
   { href: "/admin/sponsors", label: "Sponsors", icon: Award },
+  { href: "/admin/billing", label: "Billing & Invoices", icon: Receipt },
   { href: "/admin/reports", label: "Reports & PDFs", icon: Printer },
   { href: "/admin/lfhq-radio", label: "LFHQ Radio", icon: Radio },
 ];

@@ -8,6 +8,11 @@ import type {
   Division,
   EventStatus,
   TeamMember,
+  Invoice,
+  PayerType,
+  PaymentMethod,
+  PaymentStatus,
+  AEUType,
 } from "./types";
 
 // Table names matching actual Airtable base
@@ -23,6 +28,7 @@ const TABLES = {
   STATES: "States",
   USERS: "Users",
   AUDIT_LOG: "Audit Log",
+  INVOICES: "Invoices",
 };
 
 // Lazy initialization of Airtable base to avoid build-time errors
@@ -802,6 +808,150 @@ export async function searchSchools(query: string): Promise<School[]> {
     return schools;
   } catch (error) {
     console.error("Error searching schools:", error);
+    throw error;
+  }
+}
+
+// ============================================================
+// INVOICES
+// ============================================================
+
+function mapInvoiceRecord(record: Airtable.Record<Airtable.FieldSet>): Invoice {
+  return {
+    id: record.id,
+    createdTime: record._rawJson.createdTime,
+    invoiceNumber: (record.get("Invoice Number") as string) || record.id,
+    charterId: getFirstLinkedId(record.get("Charter")) || "",
+    charterName: (record.get("Charter Name") as string[])?.[0] || "",
+    billingContact: (record.get("Billing Contact") as string) || "",
+    billingEmail: (record.get("Billing Email") as string) || "",
+    billingPhone: (record.get("Billing Phone") as string) || "",
+    payerType: (record.get("Payer Type") as PayerType) || "Teacher",
+    aeuType: (record.get("AEU Type") as AEUType) || "School District",
+    paymentMethod: (record.get("Payment Method") as PaymentMethod) || "Credit Card",
+    paymentStatus: (record.get("Payment Status") as PaymentStatus) || "Unpaid",
+    totalAmount: (record.get("Total Amount") as number) || 0,
+    taxExempt: (record.get("Tax Exempt") as boolean) || false,
+    taxExemptNumber: (record.get("Tax Exempt Number") as string) || "",
+    paidAt: (record.get("Paid At") as string) || null,
+    notes: (record.get("Notes") as string) || "",
+  };
+}
+
+export async function getInvoices(options?: {
+  paymentStatus?: PaymentStatus;
+  limit?: number;
+}): Promise<Invoice[]> {
+  try {
+    const filterFormulas: string[] = [];
+    if (options?.paymentStatus) {
+      filterFormulas.push(`{Payment Status} = '${options.paymentStatus}'`);
+    }
+
+    const selectOptions: Record<string, unknown> = {
+      sort: [{ field: "Created At", direction: "desc" }],
+      maxRecords: options?.limit || 200,
+    };
+    if (filterFormulas.length > 0) {
+      selectOptions.filterByFormula = filterFormulas.length === 1
+        ? filterFormulas[0]
+        : `AND(${filterFormulas.join(",")})`;
+    }
+
+    const records = await getBase()(TABLES.INVOICES)
+      .select(selectOptions)
+      .all();
+
+    return records.map(mapInvoiceRecord);
+  } catch (error) {
+    console.error("Error fetching invoices:", error);
+    throw error;
+  }
+}
+
+export async function getInvoice(invoiceId: string): Promise<Invoice | null> {
+  try {
+    const record = await getBase()(TABLES.INVOICES).find(invoiceId);
+    return mapInvoiceRecord(record);
+  } catch (error) {
+    console.error("Error fetching invoice:", error);
+    return null;
+  }
+}
+
+export async function createInvoice(data: {
+  charterId: string;
+  billingContact: string;
+  billingEmail: string;
+  billingPhone: string;
+  payerType: PayerType;
+  aeuType: AEUType;
+  paymentMethod: PaymentMethod;
+  totalAmount: number;
+  taxExempt: boolean;
+  taxExemptNumber?: string;
+  notes?: string;
+}): Promise<Invoice> {
+  try {
+    const fields: Partial<Airtable.FieldSet> = {
+      Charter: [data.charterId],
+      "Billing Contact": data.billingContact,
+      "Billing Email": data.billingEmail,
+      "Billing Phone": data.billingPhone,
+      "Payer Type": data.payerType,
+      "AEU Type": data.aeuType,
+      "Payment Method": data.paymentMethod,
+      "Payment Status": "Unpaid",
+      "Total Amount": data.totalAmount,
+      "Tax Exempt": data.taxExempt,
+    };
+    if (data.taxExemptNumber) fields["Tax Exempt Number"] = data.taxExemptNumber;
+    if (data.notes) fields["Notes"] = data.notes;
+
+    const record = await getBase()(TABLES.INVOICES).create(fields);
+    return mapInvoiceRecord(record);
+  } catch (error) {
+    console.error("Error creating invoice:", error);
+    throw error;
+  }
+}
+
+export async function updateInvoice(
+  invoiceId: string,
+  data: Partial<{
+    billingContact: string;
+    billingEmail: string;
+    billingPhone: string;
+    payerType: PayerType;
+    aeuType: AEUType;
+    paymentMethod: PaymentMethod;
+    paymentStatus: PaymentStatus;
+    totalAmount: number;
+    taxExempt: boolean;
+    taxExemptNumber: string;
+    paidAt: string;
+    notes: string;
+  }>
+): Promise<Invoice> {
+  try {
+    const fields: Partial<Airtable.FieldSet> = {};
+    if (data.billingContact !== undefined) fields["Billing Contact"] = data.billingContact;
+    if (data.billingEmail !== undefined) fields["Billing Email"] = data.billingEmail;
+    if (data.billingPhone !== undefined) fields["Billing Phone"] = data.billingPhone;
+    if (data.payerType !== undefined) fields["Payer Type"] = data.payerType;
+    if (data.aeuType !== undefined) fields["AEU Type"] = data.aeuType;
+    if (data.paymentMethod !== undefined) fields["Payment Method"] = data.paymentMethod;
+    if (data.paymentStatus !== undefined) fields["Payment Status"] = data.paymentStatus;
+    if (data.totalAmount !== undefined) fields["Total Amount"] = data.totalAmount;
+    if (data.taxExempt !== undefined) fields["Tax Exempt"] = data.taxExempt;
+    if (data.taxExemptNumber !== undefined) fields["Tax Exempt Number"] = data.taxExemptNumber;
+    if (data.paidAt !== undefined) fields["Paid At"] = data.paidAt;
+    if (data.notes !== undefined) fields["Notes"] = data.notes;
+
+    const record = await getBase()(TABLES.INVOICES).update(invoiceId, fields);
+    return mapInvoiceRecord(record);
+  } catch (error) {
+    console.error("Error updating invoice:", error);
     throw error;
   }
 }

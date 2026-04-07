@@ -6,6 +6,9 @@ import { Layers, Loader2, RefreshCw } from "lucide-react";
 interface DivisionRecord {
   id: string;
   name: string;
+  code?: string;
+  gradeRange?: string;
+  ageRange?: string;
 }
 
 export default function DivisionsPage() {
@@ -35,7 +38,7 @@ export default function DivisionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Divisions</h1>
           <p className="text-slate-500 mt-1">
-            Competition divisions (HSBBQ, MSBBQ, etc.)
+            Competition divisions (K-20) — Kids Que through Mentor BBQ
           </p>
         </div>
         <button
@@ -69,6 +72,15 @@ export default function DivisionsPage() {
                     Division Name
                   </th>
                   <th className="text-left px-4 py-3 font-medium text-slate-500">
+                    Code
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-500">
+                    Grade Range
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-500">
+                    Age Range
+                  </th>
+                  <th className="text-left px-4 py-3 font-medium text-slate-500">
                     Record ID
                   </th>
                 </tr>
@@ -78,6 +90,15 @@ export default function DivisionsPage() {
                   <tr key={d.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3 font-medium text-slate-900">
                       {d.name}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {d.code || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {d.gradeRange || "—"}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {d.ageRange || "—"}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-400 font-mono">
                       {d.id}

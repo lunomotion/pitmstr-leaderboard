@@ -169,6 +169,81 @@ export interface Award {
   eventDate: string;
 }
 
+// Invoice types
+export type PayerType = "Teacher" | "Office Admin" | "CTE Director" | "Parent" | "Sponsor" | "In-Kind Donor";
+export type PaymentMethod = "Check" | "Credit Card" | "Purchase Order";
+export type PaymentStatus = "Unpaid" | "Pending" | "Paid" | "Refunded";
+export type AEUType =
+  | "School District"
+  | "County"
+  | "Independent School District"
+  | "Parish System"
+  | "Charter System"
+  | "Local Education Agency"
+  | "Faith Based Entity"
+  | "Regional School Unit"
+  | "Supervisory Union"
+  | "Education Service Center"
+  | "Unified School District";
+
+export interface Invoice extends AirtableRecord {
+  invoiceNumber: string;
+  charterId: string;
+  charterName?: string;
+  billingContact: string;
+  billingEmail: string;
+  billingPhone: string;
+  payerType: PayerType;
+  aeuType: AEUType;
+  paymentMethod: PaymentMethod;
+  paymentStatus: PaymentStatus;
+  totalAmount: number;
+  taxExempt: boolean;
+  taxExemptNumber: string;
+  paidAt: string | null;
+  notes: string;
+  state?: string;
+  teamCount?: number;
+}
+
+export const PAYER_TYPES: PayerType[] = [
+  "Teacher",
+  "Office Admin",
+  "CTE Director",
+  "Parent",
+  "Sponsor",
+  "In-Kind Donor",
+];
+
+export const PAYMENT_METHODS: PaymentMethod[] = [
+  "Check",
+  "Credit Card",
+  "Purchase Order",
+];
+
+export const PAYMENT_STATUSES: PaymentStatus[] = [
+  "Unpaid",
+  "Pending",
+  "Paid",
+  "Refunded",
+];
+
+export const AEU_TYPES: AEUType[] = [
+  "School District",
+  "County",
+  "Independent School District",
+  "Parish System",
+  "Charter System",
+  "Local Education Agency",
+  "Faith Based Entity",
+  "Regional School Unit",
+  "Supervisory Union",
+  "Education Service Center",
+  "Unified School District",
+];
+
+export const CHARTER_FEE = 250; // $250 per team charter
+
 // Constants - Default categories (actual list comes from Airtable)
 export const CATEGORIES: Category[] = [
   "Overall",
@@ -184,16 +259,62 @@ export const CATEGORIES: Category[] = [
   "Dutch Oven Dessert",
 ];
 
-export const DIVISIONS: { value: Division; label: string; description: string }[] = [
+export const DIVISIONS: { value: Division; label: string; description: string; code: string; gradeRange: string; ageRange: string }[] = [
   {
-    value: "HSBBQ",
-    label: "High School",
-    description: "High School BBQ Division (Grades 9-12)",
+    value: "Kids Que",
+    label: "Kids Que",
+    code: "KQ",
+    gradeRange: "K-4",
+    ageRange: "5-11",
+    description: "Kids Que Division (K-4, Ages 5-11)",
   },
   {
-    value: "MSBBQ",
-    label: "Middle School",
-    description: "Middle School BBQ Division (Grades 6-8)",
+    value: "Middle School BBQ",
+    label: "Middle School BBQ",
+    code: "MSBBQ",
+    gradeRange: "K5-8",
+    ageRange: "11-13",
+    description: "Middle School BBQ Division (K5-8, Ages 11-13)",
+  },
+  {
+    value: "High School BBQ",
+    label: "High School BBQ",
+    code: "HSBBQ",
+    gradeRange: "K9-12",
+    ageRange: "14-18",
+    description: "High School BBQ Division (K9-12, Ages 14-18)",
+  },
+  {
+    value: "Inclusive BBQ",
+    label: "Inclusive BBQ",
+    code: "IBBQ",
+    gradeRange: "K5-12",
+    ageRange: "11-18",
+    description: "Inclusive BBQ Division (K5-12, Ages 11-18)",
+  },
+  {
+    value: "Collegiate BBQ",
+    label: "Collegiate BBQ",
+    code: "CBBQ",
+    gradeRange: "K13-20",
+    ageRange: "",
+    description: "Collegiate BBQ Division (K13-20)",
+  },
+  {
+    value: "Open BBQ",
+    label: "Open BBQ",
+    code: "OPEN",
+    gradeRange: "",
+    ageRange: "Anyone",
+    description: "Open BBQ Division (Anyone)",
+  },
+  {
+    value: "Mentor BBQ",
+    label: "Mentor BBQ",
+    code: "MENTOR",
+    gradeRange: "",
+    ageRange: "Students/Adults",
+    description: "Mentor BBQ Division (Students/Adults)",
   },
 ];
 

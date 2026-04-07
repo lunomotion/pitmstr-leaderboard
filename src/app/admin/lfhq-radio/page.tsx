@@ -3,8 +3,7 @@
 import { Radio, ExternalLink, Signal } from "lucide-react";
 
 export default function LFHQRadioPage() {
-  // TODO: Replace with actual radio station dashboard URL once provided by Mike
-  const RADIO_DASHBOARD_URL = "#";
+  const RADIO_DASHBOARD_URL = "https://voyager.neptunenow.com";
 
   return (
     <div className="max-w-3xl mx-auto space-y-8">
@@ -52,15 +51,14 @@ export default function LFHQRadioPage() {
               Station Status
             </span>
           </div>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-            Awaiting Link
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+            Connected
           </span>
         </div>
         <p className="mt-3 text-sm text-slate-400">
-          The radio station dashboard link will be provided by the station
-          provider. Once available, this page will link directly to the live
-          dashboard.
+          LIVE FIRE HQ Radio is hosted on Neptune Now (Voyager). Click the
+          button above to open the radio dashboard.
         </p>
       </div>
     </div>
