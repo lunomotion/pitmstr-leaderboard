@@ -188,7 +188,7 @@ export async function getEvents(options?: {
         location: record.get("Location") as string,
         city: ((record.get("Location") as string) || "").split(",")[0]?.trim() || "",
         state: stateInfo?.abbreviation || stateInfo?.name || "",
-        division: division || "HSBBQ",
+        division: division || "",
         status: "upcoming" as EventStatus, // Default status - could be calculated from date
         description: record.get("Description") as string | undefined,
         hostSchool: undefined, // Not directly available
@@ -252,7 +252,7 @@ export async function getEvent(eventId: string): Promise<Event | null> {
       location: record.get("Location") as string,
       city: ((record.get("Location") as string) || "").split(",")[0]?.trim() || "",
       state: stateInfo?.abbreviation || stateInfo?.name || "",
-      division: division || "HSBBQ",
+      division: division || "",
       status: "upcoming" as EventStatus,
       description: record.get("Description") as string | undefined,
       registeredTeams: record.get("Team Count") as number | undefined,
@@ -419,7 +419,7 @@ export async function getTeam(teamId: string): Promise<Team | null> {
       name: record.get("Team Name") as string,
       schoolId: schoolId,
       schoolName: schoolName,
-      division: division || "HSBBQ",
+      division: division || "",
       coach: record.get("Advisor / Coach") as string | undefined,
       state: record.get("State") as string | undefined,
     };
@@ -505,7 +505,7 @@ export async function searchTeams(query: string): Promise<Team[]> {
           name: teamName,
           schoolId: schoolId,
           schoolName: schoolName,
-          division: division || "HSBBQ",
+          division: division || "",
           coach: record.get("Advisor / Coach") as string | undefined,
           state: state,
         });

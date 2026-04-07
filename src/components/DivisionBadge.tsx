@@ -5,6 +5,20 @@ interface DivisionBadgeProps {
   size?: "sm" | "md";
 }
 
+// Known division styles — any division not listed here gets a neutral default
+const DIVISION_STYLES: Record<string, string> = {
+  "Kids Que": "bg-amber-500 text-white",
+  "Middle School BBQ": "bg-brisket-brown text-white",
+  "High School BBQ": "bg-americana-blue text-white",
+  "Inclusive BBQ": "bg-purple-600 text-white",
+  "Collegiate BBQ": "bg-emerald-600 text-white",
+  "Open BBQ": "bg-slate-700 text-white",
+  "Mentor BBQ": "bg-sky-600 text-white",
+  // Legacy values from old Airtable data
+  HSBBQ: "bg-americana-blue text-white",
+  MSBBQ: "bg-brisket-brown text-white",
+};
+
 export default function DivisionBadge({
   division,
   size = "sm",
@@ -14,69 +28,14 @@ export default function DivisionBadge({
     md: "px-3 py-1 text-sm",
   };
 
-  const divisionConfig: Record<string, { label: string; fullLabel: string; className: string }> = {
-    "Kids Que": {
-      label: "KIDS QUE",
-      fullLabel: "Kids Que",
-      className: "bg-amber-500 text-white",
-    },
-    "Middle School BBQ": {
-      label: "MSBBQ",
-      fullLabel: "Middle School BBQ",
-      className: "bg-brisket-brown text-white",
-    },
-    "High School BBQ": {
-      label: "HSBBQ",
-      fullLabel: "High School BBQ",
-      className: "bg-americana-blue text-white",
-    },
-    "Inclusive BBQ": {
-      label: "IBBQ",
-      fullLabel: "Inclusive BBQ",
-      className: "bg-purple-600 text-white",
-    },
-    "Collegiate BBQ": {
-      label: "CBBQ",
-      fullLabel: "Collegiate BBQ",
-      className: "bg-emerald-600 text-white",
-    },
-    "Open BBQ": {
-      label: "OPEN",
-      fullLabel: "Open BBQ",
-      className: "bg-slate-700 text-white",
-    },
-    "Mentor BBQ": {
-      label: "MENTOR",
-      fullLabel: "Mentor BBQ",
-      className: "bg-sky-600 text-white",
-    },
-    // Legacy values for backward compat with old Airtable data
-    HSBBQ: {
-      label: "HSBBQ",
-      fullLabel: "High School BBQ",
-      className: "bg-americana-blue text-white",
-    },
-    MSBBQ: {
-      label: "MSBBQ",
-      fullLabel: "Middle School BBQ",
-      className: "bg-brisket-brown text-white",
-    },
-  };
-
-  // Default config for unknown divisions
-  const defaultConfig = {
-    label: division || "BBQ",
-    fullLabel: division || "BBQ Division",
-    className: "bg-neutral-grey text-smoke-black",
-  };
-
-  const config = divisionConfig[division] || defaultConfig;
+  const className = DIVISION_STYLES[division] || "bg-neutral-grey text-smoke-black";
+  const label = division || "BBQ";
 
   return (
     <span
-      className={`inline-flex items-center rounded font-semibold uppercase tracking-wide ${config.className} ${sizeClasses[size]}`}
+      className={`inline-flex items-center rounded font-semibold uppercase tracking-wide ${className} ${sizeClasses[size]}`}
     >
-      {config.label}
+      {label}
     </span>
   );
 }

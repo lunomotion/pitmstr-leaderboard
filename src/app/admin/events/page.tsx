@@ -41,9 +41,20 @@ export default function AdminEventsPage() {
     name: "",
     date: "",
     location: "",
-    division: "HSBBQ",
+    division: "",
     description: "",
   });
+  const [divisions, setDivisions] = useState<{ id: string; name: string; code: string }[]>([]);
+
+  async function fetchDivisions() {
+    try {
+      const res = await fetch("/api/admin/lookups?table=divisions");
+      const json = await res.json();
+      if (json.success) setDivisions(json.data || []);
+    } catch {
+      // silent
+    }
+  }
 
   async function fetchEvents() {
     try {
@@ -61,6 +72,7 @@ export default function AdminEventsPage() {
 
   useEffect(() => {
     fetchEvents();
+    fetchDivisions();
   }, []);
 
   async function handleAddEvent(e: React.FormEvent) {
@@ -77,7 +89,7 @@ export default function AdminEventsPage() {
 
       if (json.success) {
         setShowAddModal(false);
-        setNewEvent({ name: "", date: "", location: "", division: "HSBBQ", description: "" });
+        setNewEvent({ name: "", date: "", location: "", division: "", description: "" });
         fetchEvents();
       } else {
         alert("Failed to create event: " + json.error);
@@ -401,8 +413,12 @@ export default function AdminEventsPage() {
                   onChange={(e) => setNewEvent({ ...newEvent, division: e.target.value })}
                   className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-americana-blue"
                 >
-                  <option value="HSBBQ">High School (HSBBQ)</option>
-                  <option value="MSBBQ">Middle School (MSBBQ)</option>
+                  <option value="">Select Division</option>
+                  {divisions.map((d) => (
+                    <option key={d.id} value={d.name}>
+                      {d.name} ({d.code})
+                    </option>
+                  ))}
                 </select>
               </div>
 

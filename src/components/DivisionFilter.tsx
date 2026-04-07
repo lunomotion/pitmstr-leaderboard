@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import type { Division } from "@/lib/types";
 
 interface DivisionFilterProps {
@@ -7,34 +8,56 @@ interface DivisionFilterProps {
   onDivisionChange: (division: Division | "all") => void;
 }
 
+interface DivisionRecord {
+  id: string;
+  name: string;
+  code: string;
+}
+
 export default function DivisionFilter({
   selectedDivision,
   onDivisionChange,
 }: DivisionFilterProps) {
-  const divisions: { value: Division | "all"; label: string }[] = [
-    { value: "all", label: "All Divisions" },
-    { value: "Kids Que", label: "Kids Que" },
-    { value: "Middle School BBQ", label: "MSBBQ" },
-    { value: "High School BBQ", label: "HSBBQ" },
-    { value: "Inclusive BBQ", label: "IBBQ" },
-    { value: "Collegiate BBQ", label: "CBBQ" },
-    { value: "Open BBQ", label: "Open" },
-    { value: "Mentor BBQ", label: "Mentor" },
-  ];
+  const [divisions, setDivisions] = useState<DivisionRecord[]>([]);
+
+  useEffect(() => {
+    async function fetchDivisions() {
+      try {
+        const res = await fetch("/api/admin/lookups?table=divisions");
+        const json = await res.json();
+        if (json.success && json.data) {
+          setDivisions(json.data);
+        }
+      } catch {
+        // silent — buttons just won't show
+      }
+    }
+    fetchDivisions();
+  }, []);
 
   return (
     <div className="flex gap-2 overflow-x-auto pb-1">
-      {divisions.map((division) => (
+      <button
+        onClick={() => onDivisionChange("all")}
+        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
+          selectedDivision === "all"
+            ? "bg-smoke-black text-white"
+            : "bg-light-grey text-smoke-black hover:bg-neutral-grey/30"
+        }`}
+      >
+        All Divisions
+      </button>
+      {divisions.map((d) => (
         <button
-          key={division.value}
-          onClick={() => onDivisionChange(division.value)}
+          key={d.id}
+          onClick={() => onDivisionChange(d.name)}
           className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
-            selectedDivision === division.value
+            selectedDivision === d.name
               ? "bg-smoke-black text-white"
               : "bg-light-grey text-smoke-black hover:bg-neutral-grey/30"
           }`}
         >
-          {division.label}
+          {d.code || d.name}
         </button>
       ))}
     </div>
