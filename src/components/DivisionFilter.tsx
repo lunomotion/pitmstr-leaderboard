@@ -13,17 +13,22 @@ export default function DivisionFilter({
 }: DivisionFilterProps) {
   const divisions: { value: Division | "all"; label: string }[] = [
     { value: "all", label: "All Divisions" },
-    { value: "HSBBQ", label: "High School" },
-    { value: "MSBBQ", label: "Middle School" },
+    { value: "Kids Que", label: "Kids Que" },
+    { value: "Middle School BBQ", label: "MSBBQ" },
+    { value: "High School BBQ", label: "HSBBQ" },
+    { value: "Inclusive BBQ", label: "IBBQ" },
+    { value: "Collegiate BBQ", label: "CBBQ" },
+    { value: "Open BBQ", label: "Open" },
+    { value: "Mentor BBQ", label: "Mentor" },
   ];
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 overflow-x-auto pb-1">
       {divisions.map((division) => (
         <button
           key={division.value}
           onClick={() => onDivisionChange(division.value)}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors whitespace-nowrap ${
             selectedDivision === division.value
               ? "bg-smoke-black text-white"
               : "bg-light-grey text-smoke-black hover:bg-neutral-grey/30"

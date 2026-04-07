@@ -15,14 +15,50 @@ export default function DivisionBadge({
   };
 
   const divisionConfig: Record<string, { label: string; fullLabel: string; className: string }> = {
+    "Kids Que": {
+      label: "KIDS QUE",
+      fullLabel: "Kids Que",
+      className: "bg-amber-500 text-white",
+    },
+    "Middle School BBQ": {
+      label: "MSBBQ",
+      fullLabel: "Middle School BBQ",
+      className: "bg-brisket-brown text-white",
+    },
+    "High School BBQ": {
+      label: "HSBBQ",
+      fullLabel: "High School BBQ",
+      className: "bg-americana-blue text-white",
+    },
+    "Inclusive BBQ": {
+      label: "IBBQ",
+      fullLabel: "Inclusive BBQ",
+      className: "bg-purple-600 text-white",
+    },
+    "Collegiate BBQ": {
+      label: "CBBQ",
+      fullLabel: "Collegiate BBQ",
+      className: "bg-emerald-600 text-white",
+    },
+    "Open BBQ": {
+      label: "OPEN",
+      fullLabel: "Open BBQ",
+      className: "bg-slate-700 text-white",
+    },
+    "Mentor BBQ": {
+      label: "MENTOR",
+      fullLabel: "Mentor BBQ",
+      className: "bg-sky-600 text-white",
+    },
+    // Legacy values for backward compat with old Airtable data
     HSBBQ: {
       label: "HSBBQ",
-      fullLabel: "High School",
+      fullLabel: "High School BBQ",
       className: "bg-americana-blue text-white",
     },
     MSBBQ: {
       label: "MSBBQ",
-      fullLabel: "Middle School",
+      fullLabel: "Middle School BBQ",
       className: "bg-brisket-brown text-white",
     },
   };
