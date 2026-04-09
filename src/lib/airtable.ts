@@ -13,6 +13,8 @@ import type {
   PaymentMethod,
   PaymentStatus,
   AEUType,
+  VendorDocument,
+  VendorDocType,
 } from "./types";
 
 // Table names matching actual Airtable base
@@ -29,6 +31,7 @@ const TABLES = {
   USERS: "Users",
   AUDIT_LOG: "Audit Log",
   INVOICES: "Invoices",
+  VENDOR_DOCUMENTS: "Vendor Documents",
 };
 
 // Lazy initialization of Airtable base to avoid build-time errors
@@ -1015,5 +1018,42 @@ export async function searchStudents(query: string): Promise<TeamMember[]> {
   } catch (error) {
     console.error("Error searching students:", error);
     throw error;
+  }
+}
+
+// ============================================================
+// Vendor Documents (W-9, ACH, Insurance, Sole Source, Procurement, District Adoption)
+// ============================================================
+
+interface AirtableAttachment {
+  id: string;
+  url: string;
+  filename: string;
+}
+
+function mapVendorDocumentRecord(
+  record: Airtable.Record<Airtable.FieldSet>
+): VendorDocument {
+  const files = (record.get("File") as AirtableAttachment[] | undefined) || [];
+  const firstFile = files[0];
+  return {
+    id: record.id,
+    createdTime: record._rawJson.createdTime,
+    type: (record.get("Type") as VendorDocType) || "W-9",
+    fileName: firstFile?.filename || "",
+    fileUrl: firstFile?.url || "",
+    active: record.get("Active") !== false,
+  };
+}
+
+export async function getVendorDocuments(): Promise<VendorDocument[]> {
+  try {
+    const records = await getBase()(TABLES.VENDOR_DOCUMENTS)
+      .select({ maxRecords: 50 })
+      .all();
+    return records.map(mapVendorDocumentRecord).filter((d) => d.active && d.fileUrl);
+  } catch (error) {
+    console.error("Error fetching vendor documents:", error);
+    return [];
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import Link from "next/link";
 import {
   Receipt,
   Plus,
@@ -14,8 +15,9 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  ChevronDown,
   X,
+  Package,
+  TrendingUp,
 } from "lucide-react";
 import type {
   Invoice,
@@ -32,6 +34,8 @@ import {
   CHARTER_FEE,
 } from "@/lib/types";
 
+type TimePeriod = "month" | "year" | "all";
+
 interface CharterOption {
   id: string;
   name: string;
@@ -44,6 +48,8 @@ export default function BillingPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "">("");
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>("year");
+  const [searchQuery, setSearchQuery] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [charters, setCharters] = useState<CharterOption[]>([]);
   const [chartersLoading, setChartersLoading] = useState(false);
@@ -98,16 +104,84 @@ export default function BillingPage() {
     }
   }
 
-  // Stats
-  const totalInvoices = invoices.length;
-  const paidInvoices = invoices.filter((i) => i.paymentStatus === "Paid");
-  const unpaidInvoices = invoices.filter((i) => i.paymentStatus === "Unpaid");
-  const pendingInvoices = invoices.filter((i) => i.paymentStatus === "Pending");
+  // Filter invoices by time period for stats
+  const periodFilteredInvoices = useMemo(() => {
+    if (timePeriod === "all") return invoices;
+    const now = new Date();
+    return invoices.filter((inv) => {
+      if (!inv.createdTime) return false;
+      const d = new Date(inv.createdTime);
+      if (timePeriod === "month") {
+        return (
+          d.getFullYear() === now.getFullYear() &&
+          d.getMonth() === now.getMonth()
+        );
+      }
+      if (timePeriod === "year") {
+        return d.getFullYear() === now.getFullYear();
+      }
+      return true;
+    });
+  }, [invoices, timePeriod]);
+
+  // Search-filtered invoices for the table
+  const displayedInvoices = useMemo(() => {
+    if (!searchQuery.trim()) return periodFilteredInvoices;
+    const q = searchQuery.toLowerCase();
+    return periodFilteredInvoices.filter(
+      (inv) =>
+        inv.charterName?.toLowerCase().includes(q) ||
+        inv.invoiceNumber?.toLowerCase().includes(q) ||
+        inv.billingContact?.toLowerCase().includes(q) ||
+        inv.billingEmail?.toLowerCase().includes(q)
+    );
+  }, [periodFilteredInvoices, searchQuery]);
+
+  // Stats (based on period filtered)
+  const totalInvoices = periodFilteredInvoices.length;
+  const paidInvoices = periodFilteredInvoices.filter(
+    (i) => i.paymentStatus === "Paid"
+  );
+  const unpaidInvoices = periodFilteredInvoices.filter(
+    (i) => i.paymentStatus === "Unpaid"
+  );
+  const pendingInvoices = periodFilteredInvoices.filter(
+    (i) => i.paymentStatus === "Pending"
+  );
+  const totalInvoiced = periodFilteredInvoices.reduce(
+    (sum, i) => sum + i.totalAmount,
+    0
+  );
   const totalCollected = paidInvoices.reduce((sum, i) => sum + i.totalAmount, 0);
   const totalOutstanding = [...unpaidInvoices, ...pendingInvoices].reduce(
     (sum, i) => sum + i.totalAmount,
     0
   );
+
+  // Monthly totals for the chart (last 12 months, all-time data)
+  const monthlyTotals = useMemo(() => {
+    const months: { label: string; total: number; paid: number }[] = [];
+    const now = new Date();
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const label = d.toLocaleDateString("en-US", { month: "short" });
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      const monthInvoices = invoices.filter((inv) => {
+        if (!inv.createdTime) return false;
+        const id = new Date(inv.createdTime);
+        return id.getFullYear() === year && id.getMonth() === month;
+      });
+      const total = monthInvoices.reduce((s, i) => s + i.totalAmount, 0);
+      const paid = monthInvoices
+        .filter((i) => i.paymentStatus === "Paid")
+        .reduce((s, i) => s + i.totalAmount, 0);
+      months.push({ label, total, paid });
+    }
+    return months;
+  }, [invoices]);
+
+  const maxMonthlyTotal = Math.max(...monthlyTotals.map((m) => m.total), 1);
 
   const statusIcon = (status: PaymentStatus) => {
     switch (status) {
@@ -175,6 +249,13 @@ export default function BillingPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <Link
+            href="/admin/billing/documents"
+            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+          >
+            <FileText className="w-4 h-4" />
+            Vendor Docs
+          </Link>
           <button
             onClick={fetchInvoices}
             className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
@@ -195,15 +276,35 @@ export default function BillingPage() {
         </div>
       </div>
 
+      {/* Time Period Toggle */}
+      <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-fit">
+        {(["month", "year", "all"] as TimePeriod[]).map((period) => (
+          <button
+            key={period}
+            onClick={() => setTimePeriod(period)}
+            className={`px-4 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+              timePeriod === period
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {period === "month" ? "This Month" : period === "year" ? "This Year" : "All Time"}
+          </button>
+        ))}
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-white rounded-xl border border-slate-100 p-5">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Total Invoices</p>
+            <p className="text-sm font-medium text-slate-500">Total Invoiced</p>
             <FileText className="w-5 h-5 text-slate-400" />
           </div>
           <p className="text-2xl font-bold text-slate-900 mt-2">
-            {totalInvoices}
+            ${totalInvoiced.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            {totalInvoices} invoice{totalInvoices !== 1 ? "s" : ""}
           </p>
         </div>
         <div className="bg-white rounded-xl border border-slate-100 p-5">
@@ -214,6 +315,9 @@ export default function BillingPage() {
           <p className="text-2xl font-bold text-green-700 mt-2">
             ${totalCollected.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
+          <p className="text-xs text-slate-400 mt-1">
+            {paidInvoices.length} paid
+          </p>
         </div>
         <div className="bg-white rounded-xl border border-slate-100 p-5">
           <div className="flex items-center justify-between">
@@ -223,36 +327,113 @@ export default function BillingPage() {
           <p className="text-2xl font-bold text-amber-700 mt-2">
             ${totalOutstanding.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
+          <p className="text-xs text-slate-400 mt-1">
+            {unpaidInvoices.length + pendingInvoices.length} unpaid
+          </p>
         </div>
         <div className="bg-white rounded-xl border border-slate-100 p-5">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Paid</p>
+            <p className="text-sm font-medium text-slate-500">Collection Rate</p>
             <CheckCircle className="w-5 h-5 text-green-500" />
           </div>
           <p className="text-2xl font-bold text-slate-900 mt-2">
-            {paidInvoices.length}
-            <span className="text-sm font-normal text-slate-400 ml-1">
-              / {totalInvoices}
-            </span>
+            {totalInvoiced > 0
+              ? Math.round((totalCollected / totalInvoiced) * 100)
+              : 0}
+            %
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            of total invoiced
           </p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex items-center gap-3">
-        <Filter className="w-4 h-4 text-slate-400" />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value as PaymentStatus | "")}
-          className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-americana-blue/20"
-        >
-          <option value="">All Statuses</option>
-          {PAYMENT_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+      {/* Monthly Chart */}
+      <div className="bg-white rounded-2xl border border-slate-100 p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <TrendingUp className="w-5 h-5 text-americana-blue" />
+          <h2 className="font-semibold text-slate-900">Monthly Revenue</h2>
+          <span className="text-xs text-slate-400">(Last 12 months)</span>
+        </div>
+        <div className="flex items-end gap-2 h-40">
+          {monthlyTotals.map((m, i) => {
+            const totalHeight = (m.total / maxMonthlyTotal) * 100;
+            const paidHeight = (m.paid / maxMonthlyTotal) * 100;
+            return (
+              <div
+                key={i}
+                className="flex-1 flex flex-col items-center gap-1.5 group"
+              >
+                <div className="w-full h-full flex items-end relative">
+                  {m.total > 0 && (
+                    <div
+                      className="w-full bg-slate-200 rounded-t relative"
+                      style={{ height: `${totalHeight}%` }}
+                    >
+                      <div
+                        className="absolute bottom-0 left-0 right-0 bg-americana-blue rounded-t"
+                        style={{
+                          height: `${
+                            m.total > 0 ? (paidHeight / totalHeight) * 100 : 0
+                          }%`,
+                        }}
+                      />
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-10">
+                        <div className="bg-slate-900 text-white text-xs rounded-lg px-2 py-1.5 whitespace-nowrap">
+                          <div>Total: ${m.total.toLocaleString()}</div>
+                          <div>Paid: ${m.paid.toLocaleString()}</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-slate-500">{m.label}</span>
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex items-center gap-4 mt-4 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 bg-americana-blue rounded-sm" />
+            <span>Paid</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-3 bg-slate-200 rounded-sm" />
+            <span>Invoiced</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters + Search */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search by school, invoice #, contact..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-americana-blue/20"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-slate-400" />
+          <select
+            value={statusFilter}
+            onChange={(e) =>
+              setStatusFilter(e.target.value as PaymentStatus | "")
+            }
+            className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-americana-blue/20"
+          >
+            <option value="">All Statuses</option>
+            {PAYMENT_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Invoice Table */}
@@ -261,12 +442,18 @@ export default function BillingPage() {
           <div className="flex items-center justify-center py-16">
             <Loader2 className="w-6 h-6 text-slate-400 animate-spin" />
           </div>
-        ) : invoices.length === 0 ? (
+        ) : displayedInvoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <Receipt className="w-12 h-12 text-slate-300 mb-3" />
-            <p className="text-slate-600 font-medium">No invoices yet</p>
+            <p className="text-slate-600 font-medium">
+              {searchQuery || timePeriod !== "all"
+                ? "No matching invoices"
+                : "No invoices yet"}
+            </p>
             <p className="text-sm text-slate-400 mt-1">
-              Create your first invoice to get started
+              {searchQuery || timePeriod !== "all"
+                ? "Try adjusting your filters"
+                : "Create your first invoice to get started"}
             </p>
           </div>
         ) : (
@@ -304,7 +491,7 @@ export default function BillingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {invoices.map((inv) => (
+                {displayedInvoices.map((inv) => (
                   <tr
                     key={inv.id}
                     className="hover:bg-slate-50 transition-colors"
@@ -340,13 +527,21 @@ export default function BillingPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
-                        {/* Download PDF */}
+                        {/* Download PDF (invoice only) */}
                         <a
                           href={`/api/reports/invoice?invoiceId=${inv.id}`}
                           className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors"
-                          title="Download PDF"
+                          title="Download Invoice PDF"
                         >
                           <Download className="w-4 h-4" />
+                        </a>
+                        {/* Download Payment Package (invoice + vendor docs) */}
+                        <a
+                          href={`/api/reports/payment-package?invoiceId=${inv.id}`}
+                          className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          title="Download Payment Package (invoice + vendor docs)"
+                        >
+                          <Package className="w-4 h-4" />
                         </a>
                         {/* Status dropdown */}
                         <select

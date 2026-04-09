@@ -244,6 +244,31 @@ export const AEU_TYPES: AEUType[] = [
 
 export const CHARTER_FEE = 250; // $250 per team charter
 
+// Vendor Documents — supporting docs schools need for payment processing
+export type VendorDocType =
+  | "W-9"
+  | "ACH"
+  | "Insurance"
+  | "Sole Source"
+  | "Procurement"
+  | "District Adoption";
+
+export interface VendorDocument extends AirtableRecord {
+  type: VendorDocType;
+  fileName: string;
+  fileUrl: string;
+  active: boolean;
+}
+
+export const VENDOR_DOC_TYPES: { type: VendorDocType; label: string; description: string }[] = [
+  { type: "W-9", label: "W-9", description: "Federal tax form required by school finance departments" },
+  { type: "ACH", label: "ACH Authorization", description: "Bank payment authorization form" },
+  { type: "Insurance", label: "Certificate of Insurance", description: "Proof of business liability insurance" },
+  { type: "Sole Source", label: "Sole Source Justification", description: "Justifies NHSBBQA as the sole provider" },
+  { type: "Procurement", label: "Procurement Form", description: "Vendor procurement documentation" },
+  { type: "District Adoption", label: "District Adoption Agreement", description: "District-level program adoption agreement" },
+];
+
 // Constants - Default categories (actual list comes from Airtable)
 export const CATEGORIES: Category[] = [
   "Overall",
