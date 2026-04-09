@@ -176,13 +176,21 @@ export default function AdminTeamsPage() {
 
   const getDivisionBadge = (division: string) => {
     const styles: Record<string, string> = {
+      // Current NHSBBQA division naming
+      "KIDSQ Division": "bg-amber-500/10 text-amber-700",
+      "MSBBQ Division": "bg-brisket-brown/10 text-brisket-brown",
+      "HSBBQ Division": "bg-americana-blue/10 text-americana-blue",
+      "HSBBQ Unified Division": "bg-purple-600/10 text-purple-700",
+      "CBBQ Division": "bg-emerald-600/10 text-emerald-700",
+      "OBBQ Division": "bg-slate-700/10 text-slate-700",
+      "Mentor BBQ": "bg-sky-600/10 text-sky-700",
+      // Legacy values — backward compatibility
       "Kids Que": "bg-amber-500/10 text-amber-700",
       "Middle School BBQ": "bg-brisket-brown/10 text-brisket-brown",
       "High School BBQ": "bg-americana-blue/10 text-americana-blue",
       "Inclusive BBQ": "bg-purple-600/10 text-purple-700",
       "Collegiate BBQ": "bg-emerald-600/10 text-emerald-700",
       "Open BBQ": "bg-slate-700/10 text-slate-700",
-      "Mentor BBQ": "bg-sky-600/10 text-sky-700",
       HSBBQ: "bg-americana-blue/10 text-americana-blue",
       MSBBQ: "bg-brisket-brown/10 text-brisket-brown",
     };

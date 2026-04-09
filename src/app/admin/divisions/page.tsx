@@ -38,7 +38,7 @@ export default function DivisionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Divisions</h1>
           <p className="text-slate-500 mt-1">
-            Competition divisions (K-20) — Kids Que through Mentor BBQ
+            Official NHSBBQA competition divisions — KIDSQ through OBBQ
           </p>
         </div>
         <button
