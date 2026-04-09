@@ -852,7 +852,6 @@ export async function getInvoices(options?: {
     }
 
     const selectOptions: Record<string, unknown> = {
-      sort: [{ field: "Created At", direction: "desc" }],
       maxRecords: options?.limit || 200,
     };
     if (filterFormulas.length > 0) {
@@ -865,7 +864,14 @@ export async function getInvoices(options?: {
       .select(selectOptions)
       .all();
 
-    return records.map(mapInvoiceRecord);
+    // Sort by Airtable's automatic createdTime (newest first) in JS
+    return records
+      .map(mapInvoiceRecord)
+      .sort((a, b) => {
+        const timeA = new Date(a.createdTime).getTime() || 0;
+        const timeB = new Date(b.createdTime).getTime() || 0;
+        return timeB - timeA;
+      });
   } catch (error) {
     console.error("Error fetching invoices:", error);
     throw error;
