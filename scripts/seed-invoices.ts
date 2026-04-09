@@ -241,7 +241,7 @@ async function seedInvoices() {
     const charter = charters[i % charters.length];
 
     // Only include fields that exist in the Airtable Invoices table
-    const fields: Record<string, unknown> = {
+    const fields: Partial<Airtable.FieldSet> = {
       Charter: [charter.id],
       "Billing Contact": demo.billingContact,
       "Billing Email": demo.billingEmail,
