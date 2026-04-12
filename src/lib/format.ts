@@ -1,10 +1,10 @@
 /**
  * Format a state abbreviation in NHSBBQA brand style.
- * "TX" → "TX HSBBQ"
+ * "TX" → "TXHSBBQA"
  */
 export function formatStateHSBBQ(state: string | undefined | null): string {
   if (!state) return "";
-  return `${state} HSBBQ`;
+  return `${state.toUpperCase()}HSBBQA`;
 }
 
 /**
@@ -28,10 +28,10 @@ const STATE_NAMES: Record<string, string> = {
 
 /**
  * Format state for official PDF branding.
- * "TX" → "Texas High School BBQ Association (TXHSBBQ)"
+ * "TX" → "Texas High School BBQ Association (TXHSBBQA)"
  */
 export function formatStateAssociation(state: string | undefined | null): string {
   if (!state) return "";
   const fullName = STATE_NAMES[state.toUpperCase()] || state;
-  return `${fullName} High School BBQ Association (${state.toUpperCase()}HSBBQ)`;
+  return `${fullName} High School BBQ Association (${state.toUpperCase()}HSBBQA)`;
 }

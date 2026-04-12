@@ -423,7 +423,7 @@ export default function AdminTeamsPage() {
                 >
                   <option value="">Select a state...</option>
                   {US_STATES.map((s) => (
-                    <option key={s.abbr} value={s.abbr}>{s.name} HSBBQ</option>
+                    <option key={s.abbr} value={s.abbr}>{s.abbr.toUpperCase()}HSBBQA — {s.name}</option>
                   ))}
                 </select>
               </div>

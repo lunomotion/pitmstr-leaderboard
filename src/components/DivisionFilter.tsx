@@ -57,7 +57,7 @@ export default function DivisionFilter({
               : "bg-light-grey text-smoke-black hover:bg-neutral-grey/30"
           }`}
         >
-          {d.code || d.name}
+          {d.name || d.code}
         </button>
       ))}
     </div>

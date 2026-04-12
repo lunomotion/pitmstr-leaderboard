@@ -152,8 +152,8 @@ export interface EventFilters {
 export interface StateAssociation {
   code: string;
   name: string;
-  fullName: string; // e.g., "Texas HSBBQ Association"
-  abbreviation: string; // e.g., "TXHSBBQ"
+  fullName: string; // e.g., "Texas High School BBQ Association"
+  abbreviation: string; // e.g., "TXHSBBQA"
   logoUrl?: string;
 }
 

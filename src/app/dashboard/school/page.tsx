@@ -258,7 +258,7 @@ export default function TeacherDashboard() {
                     </div>
                     <p className="text-sm text-slate-500">
                       {schoolData?.city && schoolData?.state
-                        ? `${schoolData.city}, ${schoolData.state} HSBBQ`
+                        ? `${schoolData.city}, ${schoolData.state.toUpperCase()}HSBBQA`
                         : "—"}
                       {" · "}{teams.length} team{teams.length !== 1 ? "s" : ""}
                     </p>
