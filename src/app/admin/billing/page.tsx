@@ -18,6 +18,8 @@ import {
   X,
   Package,
   TrendingUp,
+  CreditCard,
+  Link as LinkIcon,
 } from "lucide-react";
 import type {
   Invoice,
@@ -212,6 +214,19 @@ export default function BillingPage() {
       </span>
     );
   };
+
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  async function copyPayLink(invoiceId: string) {
+    const url = `${window.location.origin}/pay/${invoiceId}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedId(invoiceId);
+      setTimeout(() => setCopiedId((id) => (id === invoiceId ? null : id)), 1500);
+    } catch {
+      window.prompt("Copy payment link:", url);
+    }
+  }
 
   async function handleStatusChange(invoiceId: string, newStatus: PaymentStatus) {
     try {
@@ -542,6 +557,34 @@ export default function BillingPage() {
                           title="Download Payment Package (invoice + vendor docs)"
                         >
                           <Package className="w-4 h-4" />
+                        </a>
+                        {/* Copy payment link */}
+                        <button
+                          onClick={() => copyPayLink(inv.id)}
+                          disabled={inv.paymentStatus === "Paid"}
+                          className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                          title={copiedId === inv.id ? "Copied!" : "Copy payment link"}
+                        >
+                          {copiedId === inv.id ? (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <LinkIcon className="w-4 h-4" />
+                          )}
+                        </button>
+                        {/* Pay Now — opens hosted Stripe checkout via /pay page */}
+                        <a
+                          href={inv.paymentStatus === "Paid" ? undefined : `/pay/${inv.id}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-disabled={inv.paymentStatus === "Paid"}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            inv.paymentStatus === "Paid"
+                              ? "text-slate-300 pointer-events-none"
+                              : "text-slate-400 hover:text-[#C62828] hover:bg-red-50"
+                          }`}
+                          title="Open payment page"
+                        >
+                          <CreditCard className="w-4 h-4" />
                         </a>
                         {/* Status dropdown */}
                         <select

@@ -15,6 +15,10 @@ const isPublicRoute = createRouteMatcher([
   // QR code scan routes (judges access without login)
   "/scan(.*)",
 
+  // Public invoice payment pages + checkout
+  "/pay(.*)",
+  "/api/billing/checkout",
+
   // Public API routes (read-only data)
   "/api/events(.*)",
   "/api/leaderboard(.*)",
@@ -27,6 +31,9 @@ const isPublicRoute = createRouteMatcher([
 
   // Clerk webhook (called by Clerk servers, not users)
   "/api/webhooks/clerk",
+
+  // Stripe webhook (called by Stripe servers)
+  "/api/webhooks/stripe",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
