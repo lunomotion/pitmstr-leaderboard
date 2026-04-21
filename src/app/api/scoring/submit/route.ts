@@ -31,6 +31,19 @@ function getBase(): Airtable.Base {
   return new Airtable({ apiKey }).base(baseId);
 }
 
+// Airtable record IDs are always rec + 14 alphanumerics.
+const RECORD_ID_RE = /^rec[A-Za-z0-9]{14}$/;
+// Safe chars for names used inside Airtable filterByFormula string literals.
+// Prevents formula injection since we validate instead of trying to escape.
+const SAFE_NAME_RE = /^[A-Za-z0-9 .\-'&()]{1,100}$/;
+
+function isRecordId(v: unknown): v is string {
+  return typeof v === "string" && RECORD_ID_RE.test(v);
+}
+function isSafeName(v: unknown): v is string {
+  return typeof v === "string" && SAFE_NAME_RE.test(v);
+}
+
 interface SubmitScoreRequest {
   eventId: string;
   teamId: string;
@@ -53,6 +66,32 @@ export async function POST(request: NextRequest) {
     if (!body.eventId || !body.teamId || !body.category || !body.judgeId) {
       return NextResponse.json(
         { success: false, error: "eventId, teamId, category, and judgeId are required" },
+        { status: 400 }
+      );
+    }
+
+    // Shape/format validation (prevents Airtable formula injection).
+    if (!isRecordId(body.eventId)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid eventId" },
+        { status: 400 }
+      );
+    }
+    if (!isRecordId(body.teamId)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid teamId" },
+        { status: 400 }
+      );
+    }
+    if (!isSafeName(body.category)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid category" },
+        { status: 400 }
+      );
+    }
+    if (!isRecordId(body.judgeId) && !isSafeName(body.judgeId)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid judgeId" },
         { status: 400 }
       );
     }
@@ -84,12 +123,13 @@ export async function POST(request: NextRequest) {
 
     const base = getBase();
 
-    // Look up Category record ID from name
+    // Look up Category record ID from name. Double-quote delimiters are safe
+    // because SAFE_NAME_RE rejects any `"` in input.
     let categoryRecordId: string | null = null;
     try {
       const catRecords = await base("Categories")
         .select({
-          filterByFormula: `LOWER({Category Name}) = LOWER('${body.category.replace(/'/g, "\\'")}')`,
+          filterByFormula: `LOWER({Category Name}) = LOWER("${body.category}")`,
           maxRecords: 1,
         })
         .all();
@@ -100,12 +140,12 @@ export async function POST(request: NextRequest) {
       console.warn("Category lookup failed:", catErr);
     }
 
-    // Look up Judge record ID from name/ID
+    // Look up Judge record ID from name or record ID. Values are pre-validated.
     let judgeRecordId: string | null = null;
     try {
       const judgeRecords = await base("Judges")
         .select({
-          filterByFormula: `OR(LOWER({Judge Name}) = LOWER('${body.judgeId.replace(/'/g, "\\'")}'), RECORD_ID() = '${body.judgeId}')`,
+          filterByFormula: `OR(LOWER({Judge Name}) = LOWER("${body.judgeId}"), RECORD_ID() = "${body.judgeId}")`,
           maxRecords: 1,
         })
         .all();

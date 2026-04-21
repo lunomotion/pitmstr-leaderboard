@@ -7,6 +7,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import Airtable from "airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 
 const ALLOWED_TABLES = ["Judges", "Sponsors", "Volunteers"];
 
@@ -20,6 +21,9 @@ function getBase(): Airtable.Base {
 }
 
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const table = request.nextUrl.searchParams.get("table");
 

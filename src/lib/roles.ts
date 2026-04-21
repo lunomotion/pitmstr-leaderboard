@@ -55,6 +55,9 @@ const PERMISSIONS = {
 
   // Audit
   "audit:view": ["admin"],
+
+  // Admin panel API access (all /api/admin/* routes)
+  "admin:access": ["admin"],
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

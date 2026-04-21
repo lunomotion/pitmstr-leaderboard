@@ -11,6 +11,7 @@
 
 import { NextResponse } from "next/server";
 import Airtable from "airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 
 function getBase(): Airtable.Base {
   const apiKey = process.env.AIRTABLE_API_KEY;
@@ -22,6 +23,9 @@ function getBase(): Airtable.Base {
 }
 
 export async function GET() {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const base = getBase();
 

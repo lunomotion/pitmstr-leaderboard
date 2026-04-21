@@ -524,6 +524,24 @@ export async function searchTeams(query: string): Promise<Team[]> {
   }
 }
 
+// Count teams grouped by Charter in a single table scan.
+// Used by the billing dashboard to avoid O(teams) per-row charter lookups.
+export async function getTeamCountsByCharter(): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  try {
+    const records = await getBase()(TABLES.TEAMS)
+      .select({ fields: ["Charter"] })
+      .all();
+    for (const record of records) {
+      const charterId = getFirstLinkedId(record.get("Charter"));
+      if (charterId) counts[charterId] = (counts[charterId] || 0) + 1;
+    }
+  } catch (err) {
+    console.error("Error counting teams by charter:", err);
+  }
+  return counts;
+}
+
 // Get team members (Students)
 export async function getTeamMembers(teamId: string): Promise<TeamMember[]> {
   try {
