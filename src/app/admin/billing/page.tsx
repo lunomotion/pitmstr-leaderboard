@@ -545,46 +545,50 @@ export default function BillingPage() {
                         {/* Download PDF (invoice only) */}
                         <a
                           href={`/api/reports/invoice?invoiceId=${inv.id}`}
-                          className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-americana-blue"
                           title="Download Invoice PDF"
+                          aria-label={`Download invoice PDF for ${inv.invoiceNumber}`}
                         >
-                          <Download className="w-4 h-4" />
+                          <Download className="w-4 h-4" aria-hidden="true" />
                         </a>
                         {/* Download Payment Package (invoice + vendor docs) */}
                         <a
                           href={`/api/reports/payment-package?invoiceId=${inv.id}`}
-                          className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500"
                           title="Download Payment Package (invoice + vendor docs)"
+                          aria-label={`Download payment package for ${inv.invoiceNumber}`}
                         >
-                          <Package className="w-4 h-4" />
+                          <Package className="w-4 h-4" aria-hidden="true" />
                         </a>
                         {/* Copy payment link */}
                         <button
                           onClick={() => copyPayLink(inv.id)}
                           disabled={inv.paymentStatus === "Paid"}
-                          className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors disabled:opacity-40 disabled:hover:bg-transparent"
+                          className="p-1.5 text-slate-400 hover:text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-americana-blue disabled:opacity-40 disabled:hover:bg-transparent"
                           title={copiedId === inv.id ? "Copied!" : "Copy payment link"}
+                          aria-label={copiedId === inv.id ? `Copied link for ${inv.invoiceNumber}` : `Copy payment link for ${inv.invoiceNumber}`}
                         >
                           {copiedId === inv.id ? (
-                            <CheckCircle className="w-4 h-4 text-green-600" />
+                            <CheckCircle className="w-4 h-4 text-green-600" aria-hidden="true" />
                           ) : (
-                            <LinkIcon className="w-4 h-4" />
+                            <LinkIcon className="w-4 h-4" aria-hidden="true" />
                           )}
                         </button>
-                        {/* Pay Now — opens hosted Stripe checkout via /pay page */}
+                        {/* Pay Now opens hosted Stripe checkout via /pay page */}
                         <a
                           href={inv.paymentStatus === "Paid" ? undefined : `/pay/${inv.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-disabled={inv.paymentStatus === "Paid"}
-                          className={`p-1.5 rounded-lg transition-colors ${
+                          className={`p-1.5 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#C62828] ${
                             inv.paymentStatus === "Paid"
                               ? "text-slate-300 pointer-events-none"
                               : "text-slate-400 hover:text-[#C62828] hover:bg-red-50"
                           }`}
                           title="Open payment page"
+                          aria-label={`Open payment page for ${inv.invoiceNumber}`}
                         >
-                          <CreditCard className="w-4 h-4" />
+                          <CreditCard className="w-4 h-4" aria-hidden="true" />
                         </a>
                         {/* Status dropdown */}
                         <select
@@ -595,6 +599,7 @@ export default function BillingPage() {
                               e.target.value as PaymentStatus
                             )
                           }
+                          aria-label={`Change payment status for ${inv.invoiceNumber}`}
                           className="text-xs border border-slate-200 rounded-lg px-2 py-1 bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-americana-blue/20"
                         >
                           {PAYMENT_STATUSES.map((s) => (

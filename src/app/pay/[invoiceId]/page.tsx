@@ -80,7 +80,7 @@ export default async function PayPage({
             )}
 
             <div className="space-y-3">
-              <Row label="Charter" value={invoice.charterName || "—"} />
+              <Row label="Charter" value={invoice.charterName || "-"} />
               <Row label="Billed To" value={invoice.billingContact} />
               <Row label="Email" value={invoice.billingEmail} />
               {invoice.billingPhone && (
