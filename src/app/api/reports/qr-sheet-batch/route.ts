@@ -25,6 +25,7 @@ import {
 import { generateTeamQRSheet } from "@/lib/qr";
 import { getEvent, getSchool } from "@/lib/airtable";
 import { formatStateAssociation } from "@/lib/format";
+import { requirePermission, isAuthError } from "@/lib/auth";
 import type { QRCodeData } from "@/lib/qr";
 import Airtable from "airtable";
 
@@ -319,6 +320,9 @@ async function getEventTeams(eventId: string): Promise<BasicTeam[]> {
 // ---------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get("eventId");

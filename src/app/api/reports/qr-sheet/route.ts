@@ -16,8 +16,12 @@ import React from "react";
 import { QRTurnInSheet } from "@/lib/pdf/qr-turn-in-sheet";
 import { generateTeamQRSheet } from "@/lib/qr";
 import { getTeam, getEvent, getSchool } from "@/lib/airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const { searchParams } = new URL(request.url);
     const teamId = searchParams.get("teamId");

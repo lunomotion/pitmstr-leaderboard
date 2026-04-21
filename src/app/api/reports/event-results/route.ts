@@ -21,9 +21,13 @@ import React from "react";
 import Airtable from "airtable";
 import { EventReport } from "@/lib/pdf/event-report";
 import { getEvent, getEventLeaderboard } from "@/lib/airtable";
+import { requirePermission, isAuthError } from "@/lib/auth";
 import type { TeamEventScore, CategoryResult } from "@/lib/scoring";
 
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const { searchParams } = new URL(request.url);
     const eventId = searchParams.get("eventId");

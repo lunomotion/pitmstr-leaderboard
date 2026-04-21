@@ -20,10 +20,20 @@ export async function GET(request: NextRequest) {
 
     const leaderboard = await getEventLeaderboard(eventId, category);
 
-    return NextResponse.json({
-      success: true,
-      data: leaderboard,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: leaderboard,
+      },
+      {
+        headers: {
+          // Cache at the edge for 10s, allow stale for 30s while revalidating.
+          // Keeps judge-submission feedback near-real-time while avoiding
+          // Airtable hits on repeated leaderboard views during events.
+          "Cache-Control": "public, s-maxage=10, stale-while-revalidate=30",
+        },
+      }
+    );
   } catch (error) {
     console.error("API Error:", error);
     return NextResponse.json(

@@ -5,10 +5,14 @@ import JSZip from "jszip";
 import { getInvoice, getSchool, searchTeams, getVendorDocuments } from "@/lib/airtable";
 import { InvoicePDF } from "@/lib/pdf/invoice";
 import { CHARTER_FEE } from "@/lib/types";
+import { requirePermission, isAuthError } from "@/lib/auth";
 
 // GET /api/reports/payment-package?invoiceId=XXX
 // Returns a ZIP containing the invoice PDF + all active vendor documents
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const invoiceId = request.nextUrl.searchParams.get("invoiceId");
     if (!invoiceId) {

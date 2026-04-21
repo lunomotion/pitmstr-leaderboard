@@ -39,16 +39,23 @@ export async function GET() {
       }
     });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        events: eventsRecords.length,
-        teams: teamsRecords.length,
-        schools: chartersRecords.length,
-        students: studentsRecords.length,
-        states: uniqueStates.size,
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          events: eventsRecords.length,
+          teams: teamsRecords.length,
+          schools: chartersRecords.length,
+          students: studentsRecords.length,
+          states: uniqueStates.size,
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300",
+        },
+      }
+    );
   } catch (error) {
     console.error("API Error fetching stats:", error);
     return NextResponse.json({

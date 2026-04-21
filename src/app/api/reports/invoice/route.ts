@@ -4,8 +4,12 @@ import React from "react";
 import { getInvoice, getSchool, searchTeams } from "@/lib/airtable";
 import { InvoicePDF } from "@/lib/pdf/invoice";
 import { CHARTER_FEE } from "@/lib/types";
+import { requirePermission, isAuthError } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
+  const auth = await requirePermission("admin:access");
+  if (isAuthError(auth)) return auth;
+
   try {
     const invoiceId = request.nextUrl.searchParams.get("invoiceId");
 
