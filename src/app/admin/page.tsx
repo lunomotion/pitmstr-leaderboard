@@ -141,7 +141,7 @@ export default function AdminDashboard() {
           </p>
         </div>
         <Link
-          href="/admin/events/new"
+          href="/admin/events?new=1"
           className="inline-flex items-center gap-2 px-4 py-2.5 bg-americana-blue text-white rounded-xl font-medium text-sm hover:bg-americana-blue/90 transition-colors shadow-lg shadow-americana-blue/25"
         >
           <Plus className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
                 Create an event to get started
               </p>
               <Link
-                href="/admin/events/new"
+                href="/admin/events?new=1"
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />

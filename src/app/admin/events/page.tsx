@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus,
   Search,
@@ -28,6 +29,8 @@ interface Event {
 }
 
 export default function AdminEventsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -74,6 +77,13 @@ export default function AdminEventsPage() {
     fetchEvents();
     fetchDivisions();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setShowAddModal(true);
+      router.replace("/admin/events");
+    }
+  }, [searchParams, router]);
 
   async function handleAddEvent(e: React.FormEvent) {
     e.preventDefault();
@@ -229,13 +239,13 @@ export default function AdminEventsPage() {
                 : "Create your first event to get started"}
             </p>
             {!searchQuery && statusFilter === "all" && (
-              <Link
-                href="/admin/events/new"
+              <button
+                onClick={() => setShowAddModal(true)}
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-americana-blue hover:bg-americana-blue/5 rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Create Event
-              </Link>
+              </button>
             )}
           </div>
         ) : (
