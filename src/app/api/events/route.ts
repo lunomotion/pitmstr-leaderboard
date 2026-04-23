@@ -104,8 +104,9 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("API Error creating event:", error);
+    const message = error instanceof Error ? error.message : "Failed to create event";
     return NextResponse.json(
-      { success: false, error: "Failed to create event" },
+      { success: false, error: message },
       { status: 500 }
     );
   }

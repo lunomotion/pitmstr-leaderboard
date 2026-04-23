@@ -425,7 +425,7 @@ export default function AdminEventsPage() {
                 >
                   <option value="">Select Division</option>
                   {divisions.map((d) => (
-                    <option key={d.id} value={d.name}>
+                    <option key={d.id} value={d.id}>
                       {d.name} ({d.code})
                     </option>
                   ))}
