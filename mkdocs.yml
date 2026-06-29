@@ -134,3 +134,5 @@ nav:
       - State Director Guide: training/state-director-guide.md
   - Roadmap & Future Phases: roadmap.md
   - Handoff & Ownership: handoff-ownership.md
+
+# Docs auto-publish to GitHub Pages via .github/workflows/docs.yml
