@@ -1,0 +1,136 @@
+site_name: PITMSTR Platform Documentation
+site_description: End-to-end documentation, runbook, and training for the PITMSTR / NHSBBQA competition platform.
+site_author: LunoMotion
+site_url: https://lunomotion.github.io/pitmstr-leaderboard/
+
+# Repository
+repo_name: lunomotion/pitmstr-leaderboard
+repo_url: https://github.com/lunomotion/pitmstr-leaderboard
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: red
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: red
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - navigation.indexes
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+  - toc:
+      permalink: true
+
+extra_css:
+  - stylesheets/extra.css
+
+plugins:
+  - search
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - getting-started/index.md
+      - Local Setup: getting-started/local-setup.md
+      - Environment Variables: getting-started/environment.md
+      - Project Structure: getting-started/project-structure.md
+  - Architecture:
+      - architecture/index.md
+      - System Overview: architecture/system-overview.md
+      - Request & Data Flow: architecture/request-flow.md
+      - Tech Stack: architecture/tech-stack.md
+  - Data Model:
+      - data-model/index.md
+      - Airtable Schema: data-model/airtable-schema.md
+      - Tables & Relationships: data-model/tables.md
+      - Data Access Layer: data-model/data-access.md
+  - Authentication & RBAC:
+      - auth-rbac/index.md
+      - Clerk Setup: auth-rbac/clerk.md
+      - Roles & Permissions: auth-rbac/roles.md
+      - Middleware & Route Protection: auth-rbac/middleware.md
+  - Features:
+      - features/index.md
+      - Registration & School Activation: features/registration.md
+      - Events & Teams: features/events-teams.md
+      - Scoring & Judging: features/scoring-judging.md
+      - Leaderboard: features/leaderboard.md
+      - Invoicing & Payments: features/billing.md
+      - Reports & Certificates: features/reports.md
+      - Compliance & Waivers: features/compliance.md
+      - Admin Console: features/admin-console.md
+  - API Reference:
+      - api/index.md
+      - Events: api/events.md
+      - Teams: api/teams.md
+      - Schools: api/schools.md
+      - Students: api/students.md
+      - Users & Roles: api/users.md
+      - Scoring: api/scoring.md
+      - Leaderboard & Stats: api/leaderboard-stats.md
+      - Billing: api/billing.md
+      - Reports: api/reports.md
+      - Admin: api/admin.md
+      - Webhooks: api/webhooks.md
+  - Subsystems:
+      - subsystems/index.md
+      - Scoring Engine: subsystems/scoring-engine.md
+      - Billing & Stripe: subsystems/billing-stripe.md
+      - PDF & Report Generation: subsystems/pdf-reports.md
+      - QR Check-in & Turn-in: subsystems/qr-flows.md
+  - Operations:
+      - operations/index.md
+      - Deployment: operations/deployment.md
+      - Domain & DNS: operations/domain-dns.md
+      - Runbook & Common Tasks: operations/runbook.md
+      - Monitoring & Backups: operations/monitoring.md
+  - Pre-Production:
+      - pre-production/index.md
+      - Go-Live Checklist: pre-production/checklist.md
+      - Mock Competition Test Plan: pre-production/mock-test.md
+  - Training:
+      - training/index.md
+      - New Developer Onboarding: training/new-developer.md
+      - Admin Training: training/admin-guide.md
+      - Teacher / Coach Guide: training/teacher-guide.md
+      - Judge Guide: training/judge-guide.md
+      - State Director Guide: training/state-director-guide.md
+  - Roadmap & Future Phases: roadmap.md
+  - Handoff & Ownership: handoff-ownership.md

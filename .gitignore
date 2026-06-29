@@ -43,3 +43,6 @@ next-env.d.ts
 # local backup / scratch files
 *.local
 *.m6bak
+
+# MkDocs build output
+/site/

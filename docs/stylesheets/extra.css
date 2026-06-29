@@ -1,0 +1,92 @@
+/* ==========================================================================
+   PITMSTR docs - custom theme tweaks
+   Goal: a prominent, high-contrast, orange-accented left navigation.
+   ========================================================================== */
+
+:root {
+  --pit-orange: #f4511e;        /* deep orange 600 */
+  --pit-orange-bright: #ff6a00; /* hover / active */
+  --pit-orange-soft: rgba(244, 81, 30, 0.10);
+}
+
+/* Slate (dark) mode keeps the same accent */
+[data-md-color-scheme="slate"] {
+  --pit-orange: #ff7a3c;
+  --pit-orange-bright: #ff8c52;
+  --pit-orange-soft: rgba(255, 122, 60, 0.14);
+}
+
+/* --- Sidebar container: a touch wider, subtle separation --- */
+@media screen and (min-width: 76.25em) {
+  .md-sidebar--primary {
+    width: 13.5rem;
+  }
+  .md-nav--primary {
+    border-right: 1px solid var(--md-default-fg-color--lightest);
+    padding-right: 0.4rem;
+  }
+}
+
+/* --- All nav links: bolder + higher contrast (fixes the washed-out look) --- */
+.md-nav {
+  font-size: 0.76rem;
+}
+.md-nav__link {
+  font-weight: 500;
+  color: var(--md-default-fg-color--light);
+  transition: color 0.12s ease, background-color 0.12s ease;
+}
+
+/* --- Top-level section labels: most prominent --- */
+.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link,
+.md-nav--primary > .md-nav__list > .md-nav__item > label.md-nav__link {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: var(--md-default-fg-color);
+  letter-spacing: 0.01em;
+}
+
+/* --- Hover state: orange --- */
+.md-nav__link:hover,
+.md-nav__link:focus {
+  color: var(--pit-orange-bright);
+}
+
+/* --- Active / current page: bold orange with an accent bar + soft fill --- */
+.md-nav__link--active,
+.md-nav__item--active > .md-nav__link {
+  color: var(--pit-orange) !important;
+  font-weight: 700;
+  background-color: var(--pit-orange-soft);
+  border-left: 3px solid var(--pit-orange);
+  border-radius: 0 4px 4px 0;
+  padding-left: 0.55rem;
+  margin-left: -0.1rem;
+}
+
+/* --- Expanded section's parent label gets a quiet orange tint --- */
+.md-nav__item--nested > input:checked ~ .md-nav__link {
+  color: var(--pit-orange);
+}
+
+/* --- Section index "title" (sidebar header) --- */
+.md-nav__title {
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+}
+
+/* --- Right-hand table of contents: orange active marker --- */
+.md-nav--secondary .md-nav__link--active {
+  color: var(--pit-orange) !important;
+  font-weight: 700;
+}
+
+/* --- Header bar: keep the BBQ-fire feel --- */
+.md-header {
+  box-shadow: 0 0 0.2rem rgba(0, 0, 0, 0.1), 0 0.2rem 0.4rem rgba(0, 0, 0, 0.1);
+}
+
+/* --- Links in body content use the orange accent on hover --- */
+.md-typeset a:hover {
+  color: var(--pit-orange-bright);
+}
